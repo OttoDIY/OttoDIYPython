@@ -10,20 +10,19 @@ GPL license (c) Juan Gonzalez-Gomez (Obijuan), 2011
 
 import math, time, servo
 
-Class Oscillator:
+#-- should be taken (i.e. the TS time has passed since
+#-- the last sample was taken
+def next_sample(self):	
+  self._currentMillis = time.ticks_ms() #-- Read current time
+  if self._currentMillis - self._previousMillis > self._TS:		
+    self._previousMillis = self._currentMillis;   
+    return True
+  return False
 
+Class Oscillator:
   def __init__(self, trim = 0):
     self._trim = trim
     
-  #-- should be taken (i.e. the TS time has passed since
-  #-- the last sample was taken
-  def next_sample(self):	
-    self._currentMillis = time.millis() #-- Read current time
-    if self._currentMillis - self._previousMillis > self._TS:		
-      self._previousMillis = self._currentMillis;   
-      return True
-    return False
-
   #-- Attach an oscillator to a servo
   #-- Input: pin is the arduino pin were the servo is connected
   def attach(self, pin, rev):	#-- If the oscillator is detached, it.
