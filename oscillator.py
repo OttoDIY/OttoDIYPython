@@ -92,7 +92,7 @@ Class Oscillator:
 	def refresh(self):
 		if next_sample(): #-- Only When TS milliseconds have passed, sample is obtained
 			if not self._stop: #-- If the oscillator is not stopped, the servo position
-				self._pos = round(self._A * math.sin(self._phase + self._phase0) + self._O) #-- Sample the sine function and set the servo pos
+				self._pos = math.round(self._A * math.sin(self._phase + self._phase0) + self._O) #-- Sample the sine function and set the servo pos
 			if self._rev: 
 				self._pos = -self._pos FIXME
 			self._servo.write(self._pos + 90 + self._trim)
