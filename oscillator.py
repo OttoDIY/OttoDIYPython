@@ -9,15 +9,6 @@ Oscillator.pde: GPL license (c) Juan Gonzalez-Gomez (Obijuan), 2011
 
 import math, time, servo
 
-#-- should be taken (i.e. the TS time has passed since
-#-- the last sample was taken
-def next_sample(self):	
-  self._currentMillis = time.ticks_ms() #-- Read current time
-  if self._currentMillis - self._previousMillis > self._TS:		
-    self._previousMillis = self._currentMillis;   
-    return True
-  return False
-
 Class Oscillator:
   def __init__(self, trim = 0):
     self._trim = trim
@@ -99,3 +90,13 @@ Class Oscillator:
 		  #-- It is always increased, when the oscillator is stop
 		  #-- so that the coordination is always kept
       self._phase = self._phase + self._inc
+
+#-- should be taken (i.e. the TS time has passed since
+#-- the last sample was taken
+def next_sample(self):	
+  self._currentMillis = time.ticks_ms() #-- Read current time
+  if self._currentMillis - self._previousMillis > self._TS:		
+    self._previousMillis = self._currentMillis;   
+    return True
+  return False
+
