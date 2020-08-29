@@ -1,5 +1,5 @@
 
-import machine, math
+import machine
 
 class Servo:
     """
