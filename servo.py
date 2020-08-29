@@ -13,8 +13,8 @@ class Servo:
         self.pwm = None
         self._attached = False
         
-    def attach(self, pin=self.pin, freq=self.freq):
-        self.pwm = machine.PWM(pin, freq=freq, duty=0)
+    def attach(self):
+        self.pwm = machine.PWM(self.pin, freq=self.freq, duty=0)
         self._attached = True
         
     def detach(self):
