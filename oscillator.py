@@ -9,7 +9,7 @@ OttDIY Python Project, 2020
 """
 import math, time, servo
 
-Class Oscillator:
+class Oscillator:
 	def __init__(self, trim = 0):
 		# Oscillators parameters
 		self._A = 0		# Amplitude (degrees)
