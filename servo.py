@@ -4,7 +4,7 @@ import machine
 class Servo:
     """
     A simple class for controlling hobby servos. Modeled after the ESP8266 Arduino Servo Driver
-    OttDIY Python Project
+    OttDIY Python Project, 2020
     """
     def __init__(self, freq=50, min_us=24, max_us=115, max_ang=180):
         self.min_us = min_us
