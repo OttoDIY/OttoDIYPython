@@ -35,7 +35,7 @@ class Oscillator:
 	def attach(self, pin, rev = False): 
 		if not self._servo.attached():	#-- If the oscillator is detached,
 			self._servo.attach(pin)	#-- Attach the servo and move it to the home position
-			self._servo.write(90)
+			self._servo.write(90 + self._trim)
 
 		#-- Initialization of oscilaltor parameters
 		self._TS = 30
