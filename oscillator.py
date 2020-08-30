@@ -60,11 +60,11 @@ class Oscillator:
 			self._servo.detach()
 
 	#--  Set the oscillator Phase (radians)
-	def SetA(self, int A):
+	def SetA(self, A):
 		self._A = A
 
 	#-- Set the oscillator Phase (radians)
-	def SetO(self, int O):
+	def SetO(self, O):
 		self._O = O
 
 	#-- Set the oscillator Phase (radians)
@@ -72,7 +72,7 @@ class Oscillator:
 		self._phase0 = Ph
 
 	#-- Set the oscillator period, ms
-	def SetT(self, int T):
+	def SetT(self, T):
 		self._T = T #-- Assign the period
 		self._N = self._T / self._TS #-- Recalculate the parameters
 		self._inc = 2 * math.pi / self._N
@@ -116,7 +116,7 @@ class Oscillator:
 	if another sample should be taken and position the servo if so
 	"""
 	def refresh(self):
-		if __next_sample(): #-- Only When TS milliseconds have passed, sample is obtained
+		if self.__next_sample(): #-- Only When TS milliseconds have passed, sample is obtained
 			if not self._stop: #-- If the oscillator is not stopped, the servo position
 				self._pos = math.round(self._A * math.sin(self._phase + self._phase0) + self._O) #-- Sample the sine function and set the servo pos
 				if self._rev: 
