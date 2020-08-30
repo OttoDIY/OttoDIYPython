@@ -37,22 +37,22 @@ class Oscillator:
 			self._servo.attach(pin)	#-- Attach the servo and move it to the home position
 			self._servo.write(90 + self._trim)
 
-		#-- Initialization of oscilaltor parameters
-		self._TS = 30
-		self._T = 2000
-		self._N = self._T / self._TS
-		self._inc = 2 * math.pi / self._N
-		self._previousMillis = 0
+			#-- Initialization of oscilaltor parameters
+			self._TS = 30
+			self._T = 2000
+			self._N = self._T / self._TS
+			self._inc = 2 * math.pi / self._N
+			self._previousMillis = 0
 
-		#-- Default parameters
-		self._A = 45
-		self._phase = 0
-		self._phase0 = 0
-		self._O = 0
-		self._stop = False
+			#-- Default parameters
+			self._A = 45
+			self._phase = 0
+			self._phase0 = 0
+			self._O = 0
+			self._stop = False
 
-		#-- Reverse mode
-		self._rev = rev
+			#-- Reverse mode
+			self._rev = rev
 
 	#-- Detach an oscillator from his servo
 	def detach(self):
