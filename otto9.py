@@ -5,13 +5,13 @@ import oscillator, time
 
 class Otto9:
 	def __init__(self):
-		self._servo = []
-		self._servo_pins = []
-		self._servo_trim = []
-		self._servo_position = []
+		self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator()]
+		self._servo_pins = [0,0,0,0]
+		self._servo_trim = [0,0,0,0]
+		self._servo_position = [90,90,90,90] # initialise to what the oscillator code defaults to 
 		self._final_time = 0
 		self._partial_time = 0
-		self._increment = []
+		self._increment = [0,0,0,0]
 		self._isOttoResting = True
 
 	def init(self, YL, YR, RL, RR, load_calibration = False, NoiseSensor, Buzzer, USTrigger, USEcho):  
@@ -23,12 +23,12 @@ class Otto9:
 		self._isOttoResting = False
 		if load_calibration == True:
 			for i in range(0, 5):
-				servo_trim = EEPROM.read(i) # FIXME
+				servo_trim = EEPROM.read(i) # FIXME ... add some sort of eeprom emulation
 				if servo_trim > 128:
 					servo_trim -= 256
 				self._servo[i].SetTrim(servo_trim)
-		for i in range(0, 5):
-			self._servo_position[i] = 90
+		for i in range(0, 5):			# this could be eliminated as we already initialize 
+			self._servo_position[i] = 90	# the array from __init__() above ...
 
 	#-- ATTACH & DETACH FUNCTIONS 
 	def attachServos(self):
@@ -48,7 +48,7 @@ class Otto9:
 
 	def saveTrimsOnEEPROM(self):
 		for i in range(0, 5):
-			EEPROM.write(i, self._servo[i].getTrim()) # FIXME
+			EEPROM.write(i, self._servo[i].getTrim()) # FIXME  ... add some sort of eeprom emulation
 
 #-- BASIC MOTION FUNCTIONS -------------------------------------#
 def _moveServos(self, time, servo_target):
@@ -71,7 +71,7 @@ def _moveServos(self, time, servo_target):
 		for i in range(0, 5):
 			self._servo[i].SetPosition(servo_target[i])
 	for i in range(0, 5): 
-        self._servo_position[i] = servo_target[i]
+        	self._servo_position[i] = servo_target[i]
 
 
 def _moveSingle(self, position, servo_number):
