@@ -1,49 +1,43 @@
 """
 OttDIY Python Project, 2020 
 """
-import oscillator
+import oscillator, time
 
 class Otto9:
 	def __init__(self):
-		self._servo[4] = oscillator.Oscillator()
-		self._servo_pins[4] =
-		self._servo_trim[4] =
-		self._servo_position[4] =
+		self._servo = []
+		self._servo_pins = []
+		self._servo_trim = []
+		self._servo_position = []
 		self._final_time = 0
 		self._partial_time = 0
-		self._increment[4] =
+		self._increment = []
 		self._isOttoResting = True
 
-	def init(self, YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):  
+	def init(self, YL, YR, RL, RR, load_calibration = False, NoiseSensor, Buzzer, USTrigger, USEcho):  
 		self._servo_pins[0] = YL
 		self._servo_pins[1] = YR
 		self._servo_pins[2] = RL
 		self._servo_pins[3] = RR
-
 		self.attachServos()
 		self._isOttoResting = False
-
-		if (load_calibration)
-			for (i = 0; i < 4; i++)
-				servo_trim = EEPROM.read(i)
-				if (servo_trim > 128) 
+		if load_calibration == True:
+			for i in range(0, 5):
+				servo_trim = EEPROM.read(i) # FIXME
+				if servo_trim > 128:
 					servo_trim -= 256
 				self._servo[i].SetTrim(servo_trim)
-		for (i = 0; i < 4; i++)
+		for i in range(0, 5):
 			self._servo_position[i] = 90
 
 	#-- ATTACH & DETACH FUNCTIONS 
 	def attachServos(self):
-		self._servo[0].attach(servo_pins[0])
-		self._servo[1].attach(servo_pins[1])
-		self._servo[2].attach(servo_pins[2])
-		self._servo[3].attach(servo_pins[3])
+		for i in range(0, 5):
+			self._servo[i].attach(self._servo_pins[i])
 
-	def detachServos(self):
-		self._servo[0].detach()
-		self._servo[1].detach()
-		self._servo[2].detach()
-		self._servo[3].detach()
+	def detachServos(self):	
+		for i in range(0, 5):
+			self._servo[i].detach()
 
 	#-- OSCILLATORS TRIMS
 	def setTrims(self, YL, YR, RL, RR):
@@ -52,32 +46,37 @@ class Otto9:
 		self._servo[2].SetTrim(RL)
 		self._servo[3].SetTrim(RR)
 
-	def saveTrimsOnEEPROM(self):  
-		for (i = 0; i < 4; i++)
-			EEPROM.write(i, self._servo[i].getTrim())
-
+	def saveTrimsOnEEPROM(self):
+		for i in range(0, 5):
+			EEPROM.write(i, self._servo[i].getTrim()) # FIXME
 
 #-- BASIC MOTION FUNCTIONS -------------------------------------#
-def _moveServos(self, time, servo_target[]):
-  attachServos()
-  if getRestState()==True:        setRestState(False)
+def _moveServos(self, time, servo_target):
+	self.attachServos()
+	if self.getRestState() == True:
+		self.setRestState(False)
+	if time > 10:
+		for i in range(0, 5): 
+			self._increment[i] = ((servo_target[i]) - self._servo_position[i]) / (time / 10.0)
+		self._final_time = time.ticks_ms() + time
+		iteration = 1
+		while time.ticks_ms() < self._final_time:
+			self._partial_time = time.ticks_ms() + 10
+			for i in range(0, 5): 
+				self._servo[i].SetPosition(self._servo_position[i] + (iteration * self._increment[i]))
+			while time.ticks_ms() < self._partial_time: 
+ 				pass # pause
+			iteration += 1
+	else:
+		for i in range(0, 5):
+			self._servo[i].SetPosition(servo_target[i])
+	for i in range(0, 5): 
+        self._servo_position[i] = servo_target[i]
 
 
-  if time>10:    for (i = 0; i < 4; i++) increment[i] = ((servo_target[i]) - servo_position[i]) / (time / 10.0)
-    final_time =  millis() + time
+def _moveSingle(self, position, servo_number):
 
-    for (iteration = 1; millis() < final_time; iteration++)      partial_time = millis() + 10
-      for (i = 0; i < 4; i++) servo[i].SetPosition(servo_position[i] + (iteration * increment[i]))
-      while (millis() < partial_time); #pause
-
-
-  else:
-    for (i = 0; i < 4; i++) servo[i].SetPosition(servo_target[i])
-
-  for (i = 0; i < 4; i++) servo_position[i] = servo_target[i]
-
-
-def _moveSingle(self, position, servo_number):if (position > 180) position = 90
+if (position > 180) position = 90
 if (position < 0) position = 90
   attachServos()
   if getRestState()==True:        setRestState(False)
