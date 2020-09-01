@@ -1,14 +1,27 @@
 """
 OttoDIY Python Project, 2020 
 """
-import oscillator, time
+
+import oscillator, time, math
+
+#-- Constants
+#-- FORWARD     1
+#-- BACKWARD    -1
+#-- LEFT        1
+#-- RIGHT       -1
+#-- SMALL       5
+#-- MEDIUM      15
+#-- BIG         30
+
+def DEG2RAD(g):
+	return (g * math.pi) / 180
 
 class Otto9:
 	def __init__(self):
 		self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator()]
 		self._servo_pins = [0, 0, 0, 0]
 		self._servo_trim = [0, 0, 0, 0]
-		self._servo_position = [90, 90, 90, 90] # initialised to what the oscillator code defaults to 
+		self._servo_position = [90, 90, 90, 90] #-- initialised to what the oscillator code defaults to 
 		self._final_time = 0
 		self._partial_time = 0
 		self._increment = [0, 0, 0, 0]
@@ -23,14 +36,15 @@ class Otto9:
 		self.setRestState(False)
 		if load_calibration == True:
 			for i in range(0, 5):
-				servo_trim = EEPROM.read(i) # FIXME ... add some sort of eeprom emulation
+				servo_trim = EEPROM.read(i) #-- FIXME ... add some sort of eeprom emulation
 				if servo_trim > 128:
 					servo_trim -= 256
 				self._servo[i].SetTrim(servo_trim)
-		for i in range(0, 5):			# this could be eliminated as we already initialize 
-			self._servo_position[i] = 90	# the array from __init__() above ...
+		for i in range(0, 5):			#-- this could be eliminated as we already initialize 
+			self._servo_position[i] = 90	#-- the array from __init__() above ...
 
-	#-- ATTACH & DETACH FUNCTIONS 
+	#-- ATTACH & DETACH FUNCTIONS
+	
 	def attachServos(self):
 		for i in range(0, 5):
 			self._servo[i].attach(self._servo_pins[i])
@@ -40,6 +54,7 @@ class Otto9:
 			self._servo[i].detach()
 
 	#-- OSCILLATORS TRIMS
+	
 	def setTrims(self, YL, YR, RL, RR):
 		self._servo[0].SetTrim(YL)
 		self._servo[1].SetTrim(YR)
@@ -48,9 +63,10 @@ class Otto9:
 
 	def saveTrimsOnEEPROM(self):
 		for i in range(0, 5):
-			EEPROM.write(i, self._servo[i].getTrim()) # FIXME  ... add some sort of eeprom emulation
+			EEPROM.write(i, self._servo[i].getTrim()) #-- FIXME  ... add some sort of eeprom emulation
 
-	#-- BASIC MOTION FUNCTIONS -------------------------------------#
+	#-- BASIC MOTION FUNCTIONS
+	
 	def _moveServos(self, time, servo_target):
 		self.attachServos()
 		if self.getRestState() == True:
@@ -111,13 +127,12 @@ class Otto9:
 		#-- Execute the final not complete cycle    
   		self.oscillateServos(A, O, T, phase_diff, float(steps - cycles))
 
-
-
 	#-- HOME = Otto at rest position
+	
 	def home(self):
-		if self.getRestState() == False:	# Go to rest position only if necessary
-			homes = [90, 90, 90, 90]	# All the servos at rest position
-			self._moveServos(500, homes)	# Move the servos in half a second
+		if self.getRestState() == False:	#-- Go to rest position only if necessary
+			homes = [90, 90, 90, 90]	#-- All the servos at rest position
+			self._moveServos(500, homes)	#-- Move the servos in half a second
 			self.detachServos()
 			self.setRestState(True)
 	def getRestState(self):
@@ -126,119 +141,99 @@ class Otto9:
 	def setRestState(self, state):
 		self._isOttoResting = state
 
+	#-- PREDETERMINED MOTION SEQUENCES
+
+	#-- Otto movement: Jump
+	#--  Parameters:
+	#--    steps: Number of steps
+	#--    T: Period
+
+	def jump(self, steps, T):
+		up = [90, 90, 150, 30]
+		self._moveServos(T, up)
+		down = [90, 90, 90, 90]
+		self._moveServos(T, down)
+
+	#-- Otto gait: Walking  (forward or backward)    
+	#--  Parameters:
+	#--    * steps:  Number of steps
+	#--    * T : Period
+	#--    * Dir: Direction: FORWARD / BACKWARD
+	
+	def walk(self, steps, T, dir):
+		#-- Oscillator parameters for walking
+		#-- Hip sevos are in phase
+		#-- Feet servos are in phase
+		#-- Hip and feet are 90 degrees out of phase
+		#--      -90 : Walk forward
+		#--       90 : Walk backward
+		#-- Feet servos also have the same offset (for tiptoe a little bit)
+		A = [30, 30, 20, 20]
+		O = [0, 0, 4, -4]
+		phase_diff = [0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90)] 
+		
+		#-- Let's oscillate the servos!
+  		self._execute(A, O, T, phase_diff, steps);  
+
+	#-- Otto gait: Turning (left or right)
+	#--  Parameters:
+	#--   * Steps: Number of steps
+	#--   * T: Period
+	#--   * Dir: Direction: LEFT / RIGHT
+	
+	def turn(self, steps, T, dir):
+  		#-- Same coordination than for walking (see Otto.walk)
+		#-- The Amplitudes of the hip's oscillators are not igual
+		#-- When the right hip servo amplitude is higher, steps taken by
+		#-- the right leg are bigger than the left. So, robot describes an left arc
+		A = [30, 30, 20, 20]
+		O = [0, 0, 4, -4]
+		phase_diff = [0, 0, DEG2RAD(-90), DEG2RAD(-90)] #-- FIXME DEG2RAD()
+		if dir == LEFT:
+			A[0] = 30	#-- Left hip servo
+			A[1] = 10	#-- Right hip servo
+		else:
+			A[0] = 10
+			A[1] = 30
+
+		#-- Let's oscillate the servos!
+		self._execute(A, O, T, phase_diff, steps); 
+
+	#-- Otto gait: Lateral bend
+	#--  Parameters:
+	#--    steps: Number of bends
+	#--    T: Period of one bend
+	#--    dir: RIGHT=Right bend LEFT=Left bend
+	
+	def bend(self, steps, T, dir):
+		#-- Parameters of all the movements. Default: Left bend
+		bend1 = [90, 90, 40, 35]
+		bend2 = [90, 90, 40, 105]
+		homes = [90, 90, 90, 90]
+
+		#-- Time of one bend, in order to avoid movements too fast.
+		#T = max(T, 600)
+		
+		#-- Changes in the parameters if right direction is chosen 
+		if dir == RIGHT:
+			bend1[2] = 180 - 50
+			bend1[3] = 180 - 80	#-- Not 65. Otto is unbalanced
+    			bend2[2] = 180 - 105
+			bend2[3] = 180 - 60
+
+		#-- Time of the bend movement. Fixed parameter to avoid falls
+		T2 = 800
+
+		#-- Bend movement
+		i = 0
+		while i < steps:
+			self._moveServos(T2 / 2, bend1)
+			self._moveServos(T2 / 2, bend2)
+			time.sleep((T * 0.8) / 1000)
+			self._moveServos(500, homes)
+			i += 1
 
 #end
-
-#################################/
-#-- PREDETERMINED MOTION SEQUENCES -----------------------------#
-#################################/
-
-#---------------------------------------------------------
-#-- Otto movement: Jump
-#--  Parameters:
-#--    steps: Number of steps
-#--    T: Period
-#---------------------------------------------------------
-def jump(self, steps, T):
-  int up[]={90,90,150,30
-  _moveServos(T,up)
-  int down[]={90,90,90,90
-  _moveServos(T,down)
-
-
-
-#---------------------------------------------------------
-#-- Otto gait: Walking  (forward or backward)    
-#--  Parameters:
-#--    * steps:  Number of steps
-#--    * T : Period
-#--    * Dir: Direction: FORWARD / BACKWARD
-#---------------------------------------------------------
-def walk(self, steps, T, dir):
-  #-- Oscillator parameters for walking
-  #-- Hip sevos are in phase
-  #-- Feet servos are in phase
-  #-- Hip and feet are 90 degrees out of phase
-  #--      -90 : Walk forward
-  #--       90 : Walk backward
-  #-- Feet servos also have the same offset (for tiptoe a little bit)
-  int A[4]= {30, 30, 20, 20
-  int O[4] = {0, 0, 4, -4
-  double phase_diff[4] = {0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90)
-
-  #-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps);  
-
-
-
-#---------------------------------------------------------
-#-- Otto gait: Turning (left or right)
-#--  Parameters:
-#--   * Steps: Number of steps
-#--   * T: Period
-#--   * Dir: Direction: LEFT / RIGHT
-#---------------------------------------------------------
-def turn(self, steps, T, dir):
-  #-- Same coordination than for walking (see Otto.walk)
-  #-- The Amplitudes of the hip's oscillators are not igual
-  #-- When the right hip servo amplitude is higher, steps taken by
-  #--   the right leg are bigger than the left. So, robot describes an 
-  #--   left arc
-  int A[4]= {30, 30, 20, 20
-  int O[4] = {0, 0, 4, -4
-  double phase_diff[4] = {0, 0, DEG2RAD(-90), DEG2RAD(-90)}; 
-    
-  if (dir == LEFT) {  
-    A[0] = 30; #-- Left hip servo
-    A[1] = 10; #-- Right hip servo
-
-  else:
-    A[0] = 10
-    A[1] = 30
-
-    
-  #-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
-
-
-
-#---------------------------------------------------------
-#-- Otto gait: Lateral bend
-#--  Parameters:
-#--    steps: Number of bends
-#--    T: Period of one bend
-#--    dir: RIGHT=Right bend LEFT=Left bend
-#---------------------------------------------------------
-void Otto9.bend (int steps, T, dir)
-  #Parameters of all the movements. Default: Left bend
-  int bend1[4]={90, 90, 40, 35}; 
-  int bend2[4]={90, 90, 40, 105
-  int homes[4]={90, 90, 90, 90
-
-  #Time of one bend, in order to avoid movements too fast.
-  #T=max(T, 600)
-
-  #Changes in the parameters if right direction is chosen 
-  if dir==-1:
-    bend1[2]=180-50
-    bend1[3]=180-80;  #Not 65. Otto is unbalanced
-    bend2[2]=180-105
-    bend2[3]=180-60
-
-
-  #Time of the bend movement. Fixed parameter to avoid falls
-  int T2=800; 
-
-  #Bend movement
-  for (int i=0;i<steps;i++)
-    _moveServos(T2/2,bend1)
-    _moveServos(T2/2,bend2)
-    delay(T*0.8)
-    _moveServos(500,homes)
-
-
-
-
 
 #---------------------------------------------------------
 #-- Otto gait: Shake a leg
