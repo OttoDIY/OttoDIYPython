@@ -1,5 +1,5 @@
 """
-OttDIY Python Project, 2020 
+OttoDIY Python Project, 2020 
 """
 import oscillator, time
 
@@ -50,46 +50,37 @@ class Otto9:
 		for i in range(0, 5):
 			EEPROM.write(i, self._servo[i].getTrim()) # FIXME  ... add some sort of eeprom emulation
 
-#-- BASIC MOTION FUNCTIONS -------------------------------------#
-def _moveServos(self, time, servo_target):
-	self.attachServos()
-	if self.getRestState() == True:
-		self.setRestState(False)
-	if time > 10:
-		for i in range(0, 5): 
-			self._increment[i] = ((servo_target[i]) - self._servo_position[i]) / (time / 10.0)
-		self._final_time = time.ticks_ms() + time
-		iteration = 1
-		while time.ticks_ms() < self._final_time:
-			self._partial_time = time.ticks_ms() + 10
+	#-- BASIC MOTION FUNCTIONS -------------------------------------#
+	def _moveServos(self, time, servo_target):
+		self.attachServos()
+		if self.getRestState() == True:
+			self.setRestState(False)
+		if time > 10:
 			for i in range(0, 5): 
-				self._servo[i].SetPosition(self._servo_position[i] + (iteration * self._increment[i]))
-			while time.ticks_ms() < self._partial_time: 
- 				pass # pause
-			iteration += 1
-	else:
-		for i in range(0, 5):
-			self._servo[i].SetPosition(servo_target[i])
-	for i in range(0, 5): 
-        	self._servo_position[i] = servo_target[i]
+				self._increment[i] = ((servo_target[i]) - self._servo_position[i]) / (time / 10.0)
+			self._final_time = time.ticks_ms() + time
+			iteration = 1
+			while time.ticks_ms() < self._final_time:
+				self._partial_time = time.ticks_ms() + 10
+				for i in range(0, 5): 
+					self._servo[i].SetPosition(self._servo_position[i] + (iteration * self._increment[i]))
+				while time.ticks_ms() < self._partial_time: 
+					pass # pause
+				iteration += 1
+		else:
+			for i in range(0, 5):
+				self._servo[i].SetPosition(servo_target[i])
+		for i in range(0, 5): 
+			self._servo_position[i] = servo_target[i]
 
-
-def _moveSingle(self, position, servo_number):
-
-if (position > 180) position = 90
-if (position < 0) position = 90
-  attachServos()
-  if getRestState()==True:        setRestState(False)
-
-servoNumber = servo_number
-if servoNumber == 0:  servo[0].SetPosition(position)
-
-if servoNumber == 1:  servo[1].SetPosition(position)
-
-if servoNumber == 2:  servo[2].SetPosition(position)
-
-if servoNumber == 3:  servo[3].SetPosition(position)
-
+	def _moveSingle(self, position, servo_number):
+		if position > 180 or position < 0:
+			position = 90
+		self.attachServos()
+		if self.getRestState() == True:
+			self.setRestState(False)
+		self._servo[servo_number].SetPosition(position)
+		self._servo_position[servo_number] = position
 
 
 def oscillateServos(self, A[4], O[4], T, phase_diff[4], cycle=1):
@@ -120,3 +111,361 @@ def _execute(self, A[4], O[4], T, phase_diff[4], steps = 1.0):
       
   #-- Execute the final not complete cycle    
   oscillateServos(A,O, T, phase_diff,(float)steps-cycles)
+
+
+
+#################################/
+#-- HOME = Otto at rest position -------------------------------#
+#################################/
+def home(self):
+  if(isOttoResting==False){ #Go to rest position only if necessary
+
+    int homes[4]={90, 90, 90, 90}; #All the servos at rest position
+    _moveServos(500,homes);   #Move the servos in half a second
+
+    detachServos()
+    isOttoResting=True
+
+
+
+def getRestState(self):
+    return isOttoResting
+
+
+def setRestState(self, state):
+    isOttoResting = state
+
+
+
+#################################/
+#-- PREDETERMINED MOTION SEQUENCES -----------------------------#
+#################################/
+
+#---------------------------------------------------------
+#-- Otto movement: Jump
+#--  Parameters:
+#--    steps: Number of steps
+#--    T: Period
+#---------------------------------------------------------
+def jump(self, steps, T):
+  int up[]={90,90,150,30
+  _moveServos(T,up)
+  int down[]={90,90,90,90
+  _moveServos(T,down)
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Walking  (forward or backward)    
+#--  Parameters:
+#--    * steps:  Number of steps
+#--    * T : Period
+#--    * Dir: Direction: FORWARD / BACKWARD
+#---------------------------------------------------------
+def walk(self, steps, T, dir):
+  #-- Oscillator parameters for walking
+  #-- Hip sevos are in phase
+  #-- Feet servos are in phase
+  #-- Hip and feet are 90 degrees out of phase
+  #--      -90 : Walk forward
+  #--       90 : Walk backward
+  #-- Feet servos also have the same offset (for tiptoe a little bit)
+  int A[4]= {30, 30, 20, 20
+  int O[4] = {0, 0, 4, -4
+  double phase_diff[4] = {0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90)
+
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps);  
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Turning (left or right)
+#--  Parameters:
+#--   * Steps: Number of steps
+#--   * T: Period
+#--   * Dir: Direction: LEFT / RIGHT
+#---------------------------------------------------------
+def turn(self, steps, T, dir):
+  #-- Same coordination than for walking (see Otto.walk)
+  #-- The Amplitudes of the hip's oscillators are not igual
+  #-- When the right hip servo amplitude is higher, steps taken by
+  #--   the right leg are bigger than the left. So, robot describes an 
+  #--   left arc
+  int A[4]= {30, 30, 20, 20
+  int O[4] = {0, 0, 4, -4
+  double phase_diff[4] = {0, 0, DEG2RAD(-90), DEG2RAD(-90)}; 
+    
+  if (dir == LEFT) {  
+    A[0] = 30; #-- Left hip servo
+    A[1] = 10; #-- Right hip servo
+
+  else:
+    A[0] = 10
+    A[1] = 30
+
+    
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Lateral bend
+#--  Parameters:
+#--    steps: Number of bends
+#--    T: Period of one bend
+#--    dir: RIGHT=Right bend LEFT=Left bend
+#---------------------------------------------------------
+void Otto9.bend (int steps, T, dir)
+  #Parameters of all the movements. Default: Left bend
+  int bend1[4]={90, 90, 40, 35}; 
+  int bend2[4]={90, 90, 40, 105
+  int homes[4]={90, 90, 90, 90
+
+  #Time of one bend, in order to avoid movements too fast.
+  #T=max(T, 600)
+
+  #Changes in the parameters if right direction is chosen 
+  if dir==-1:
+    bend1[2]=180-50
+    bend1[3]=180-80;  #Not 65. Otto is unbalanced
+    bend2[2]=180-105
+    bend2[3]=180-60
+
+
+  #Time of the bend movement. Fixed parameter to avoid falls
+  int T2=800; 
+
+  #Bend movement
+  for (int i=0;i<steps;i++)
+    _moveServos(T2/2,bend1)
+    _moveServos(T2/2,bend2)
+    delay(T*0.8)
+    _moveServos(500,homes)
+
+
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Shake a leg
+#--  Parameters:
+#--    steps: Number of shakes
+#--    T: Period of one shake
+#--    dir: RIGHT=Right leg LEFT=Left leg
+#---------------------------------------------------------
+void Otto9.shakeLeg (int steps, T, dir)
+  #This variable change the amount of shakes
+  int numberLegMoves=2
+
+  #Parameters of all the movements. Default: Right leg
+  int shake_leg1[4]={90, 90, 40, 35};   
+  int shake_leg2[4]={90, 90, 40, 120
+  int shake_leg3[4]={90, 90, 70, 60
+  int homes[4]={90, 90, 90, 90
+
+  #Changes in the parameters if left leg is chosen
+  if(dir==-1)      
+    shake_leg1[2]=180-15
+    shake_leg1[3]=180-40
+    shake_leg2[2]=180-120
+    shake_leg2[3]=180-58
+    shake_leg3[2]=180-60
+    shake_leg3[3]=180-58
+
+  
+  #Time of the bend movement. Fixed parameter to avoid falls
+  int T2=1000;    
+  #Time of one shake, in order to avoid movements too fast.            
+  T=T-T2
+  T=max(T,200*numberLegMoves);  
+
+  for (int j=0; j<steps;j++)
+  #Bend movement
+  _moveServos(T2/2,shake_leg1)
+  _moveServos(T2/2,shake_leg2)
+  
+    #Shake movement
+    for (int i=0;i<numberLegMoves;i++)
+    _moveServos(T/(2*numberLegMoves),shake_leg3)
+    _moveServos(T/(2*numberLegMoves),shake_leg2)
+
+    _moveServos(500,homes); #Return to home position
+
+  
+  delay(T)
+
+
+
+#---------------------------------------------------------
+#-- Otto movement: up & down
+#--  Parameters:
+#--    * steps: Number of jumps
+#--    * T: Period
+#--    * h: Jump height: SMALL / MEDIUM / BIG 
+#--              (or a number in degrees 0 - 90)
+#---------------------------------------------------------
+def updown(self, steps, T, h):
+  #-- Both feet are 180 degrees out of phase
+  #-- Feet amplitude and offset are the same
+  #-- Initial phase for the right foot is -90, that it starts
+  #--   in one extreme position (not in the middle)
+  int A[4]= {0, 0, h, h
+  int O[4] = {0, 0, h, -h
+  double phase_diff[4] = {0, 0, DEG2RAD(-90), DEG2RAD(90)
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#---------------------------------------------------------
+#-- Otto movement: swinging side to side
+#--  Parameters:
+#--     steps: Number of steps
+#--     T : Period
+#--     h : Amount of swing (from 0 to 50 aprox)
+#---------------------------------------------------------
+def swing(self, steps, T, h):
+  #-- Both feets are in phase. The offset is half the amplitude
+  #-- It causes the robot to swing from side to side
+  int A[4]= {0, 0, h, h
+  int O[4] = {0, 0, h/2, -h/2
+  double phase_diff[4] = {0, 0, DEG2RAD(0), DEG2RAD(0)
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#---------------------------------------------------------
+#-- Otto movement: swinging side to side without touching the floor with the heel
+#--  Parameters:
+#--     steps: Number of steps
+#--     T : Period
+#--     h : Amount of swing (from 0 to 50 aprox)
+#---------------------------------------------------------
+def tiptoeSwing(self, steps, T, h):
+  #-- Both feets are in phase. The offset is not half the amplitude in order to tiptoe
+  #-- It causes the robot to swing from side to side
+  int A[4]= {0, 0, h, h
+  int O[4] = {0, 0, h, -h
+  double phase_diff[4] = {0, 0, 0, 0
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Jitter 
+#--  Parameters:
+#--    steps: Number of jitters
+#--    T: Period of one jitter 
+#--    h: height (Values between 5 - 25)   
+#---------------------------------------------------------
+def jitter(self, steps, T, h):
+  #-- Both feet are 180 degrees out of phase
+  #-- Feet amplitude and offset are the same
+  #-- Initial phase for the right foot is -90, that it starts
+  #--   in one extreme position (not in the middle)
+  #-- h is constrained to avoid hit the feets
+  h=min(25,h)
+  int A[4]= {h, h, 0, 0
+  int O[4] = {0, 0, 0, 0
+  double phase_diff[4] = {DEG2RAD(-90), DEG2RAD(90), 0, 0
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Ascending & turn (Jitter while up&down)
+#--  Parameters:
+#--    steps: Number of bends
+#--    T: Period of one bend
+#--    h: height (Values between 5 - 15) 
+#---------------------------------------------------------
+def ascendingTurn(self, steps, T, h):
+  #-- Both feet and legs are 180 degrees out of phase
+  #-- Initial phase for the right foot is -90, that it starts
+  #--   in one extreme position (not in the middle)
+  #-- h is constrained to avoid hit the feets
+  h=min(13,h)
+  int A[4]= {h, h, h, h
+  int O[4] = {0, 0, h+4, -h+4
+  double phase_diff[4] = {DEG2RAD(-90), DEG2RAD(90), DEG2RAD(-90), DEG2RAD(90)
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Moonwalker. Otto moves like Michael Jackson
+#--  Parameters:
+#--    Steps: Number of steps
+#--    T: Period
+#--    h: Height. Typical valures between 15 and 40
+#--    dir: Direction: LEFT / RIGHT
+#---------------------------------------------------------
+def moonwalker(self, steps, T, h, dir):
+  #-- This motion is similar to that of the caterpillar robots: A travelling
+  #-- wave moving from one side to another
+  #-- The two Otto's feet are equivalent to a minimal configuration. It is known
+  #-- that 2 servos can move like a worm if they are 120 degrees out of phase
+  #-- In the example of Otto, two feet are mirrored so that we have:
+  #--    180 - 120 = 60 degrees. The actual phase difference given to the oscillators
+  #--  is 60 degrees.
+  #--  Both amplitudes are equal. The offset is half the amplitud plus a little bit of
+  #-   offset so that the robot tiptoe lightly
+ 
+  int A[4]= {0, 0, h, h
+  int O[4] = {0, 0, h/2+2, -h/2 -2
+  phi = -dir * 90
+  double phase_diff[4] = {0, 0, DEG2RAD(phi), DEG2RAD(-60 * dir + phi)
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#----------------------------------------------------------
+#-- Otto gait: Crusaito. A mixture between moonwalker and walk
+#--   Parameters:
+#--     steps: Number of steps
+#--     T: Period
+#--     h: height (Values between 20 - 50)
+#--     dir:  Direction: LEFT / RIGHT
+#-----------------------------------------------------------
+def crusaito(self, steps, T, h, dir):
+  int A[4]= {25, 25, h, h
+  int O[4] = {0, 0, h/2+ 4, -h/2 - 4
+  double phase_diff[4] = {90, 90, DEG2RAD(0), DEG2RAD(-60 * dir)
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#---------------------------------------------------------
+#-- Otto gait: Flapping
+#--  Parameters:
+#--    steps: Number of steps
+#--    T: Period
+#--    h: height (Values between 10 - 30)
+#--    dir: direction: FOREWARD, BACKWARD
+#---------------------------------------------------------
+def flapping(self, steps, T, h, dir):
+  int A[4]= {12, 12, h, h
+  int O[4] = {0, 0, h - 10, -h + 10
+  double phase_diff[4] = {DEG2RAD(0), DEG2RAD(180), DEG2RAD(-90 * dir), DEG2RAD(90 * dir)
+  
+  #-- Let's oscillate the servos!
+  _execute(A, O, T, phase_diff, steps); 
+
+
+
+#end
