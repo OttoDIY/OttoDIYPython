@@ -6,12 +6,12 @@ import oscillator, time
 class Otto9:
 	def __init__(self):
 		self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator()]
-		self._servo_pins = [0,0,0,0]
-		self._servo_trim = [0,0,0,0]
-		self._servo_position = [90,90,90,90] # initialised to what the oscillator code defaults to 
+		self._servo_pins = [0, 0, 0, 0]
+		self._servo_trim = [0, 0, 0, 0]
+		self._servo_position = [90, 90, 90, 90] # initialised to what the oscillator code defaults to 
 		self._final_time = 0
 		self._partial_time = 0
-		self._increment = [0,0,0,0]
+		self._increment = [0, 0, 0, 0]
 		self._isOttoResting = True
 
 	def init(self, YL, YR, RL, RR, load_calibration = False, NoiseSensor, Buzzer, USTrigger, USEcho):  
@@ -106,10 +106,10 @@ class Otto9:
 		if cycles >= 1:
 			i = 0
 			while i < cycles:
-				self.oscillateServos(A,O, T, phase_diff)
+				self.oscillateServos(A, O, T, phase_diff)
 				i += 1
 		#-- Execute the final not complete cycle    
-  		self.oscillateServos(A,O, T, phase_diff, float(steps - cycles))
+  		self.oscillateServos(A, O, T, phase_diff, float(steps - cycles))
 
 
 
