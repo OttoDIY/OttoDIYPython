@@ -127,3 +127,6 @@ class Oscillator:
 			#-- It is always increased, when the oscillator is stop
 			#-- so that the coordination is always kept
 			self._phase = self._phase + self._inc
+
+
+#end
