@@ -8,7 +8,7 @@ class Otto9:
 		self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator()]
 		self._servo_pins = [0,0,0,0]
 		self._servo_trim = [0,0,0,0]
-		self._servo_position = [90,90,90,90] # initialise to what the oscillator code defaults to 
+		self._servo_position = [90,90,90,90] # initialised to what the oscillator code defaults to 
 		self._final_time = 0
 		self._partial_time = 0
 		self._increment = [0,0,0,0]
@@ -20,7 +20,7 @@ class Otto9:
 		self._servo_pins[2] = RL
 		self._servo_pins[3] = RR
 		self.attachServos()
-		self._isOttoResting = False
+		self.setRestState(False)
 		if load_calibration == True:
 			for i in range(0, 5):
 				servo_trim = EEPROM.read(i) # FIXME ... add some sort of eeprom emulation
@@ -82,60 +82,52 @@ class Otto9:
 		self._servo[servo_number].SetPosition(position)
 		self._servo_position[servo_number] = position
 
+	def oscillateServos(self, A, O, T, phase_diff, cycle = 1.0):
+		for i in range(0, 5):
+			self._servo[i].SetO(O[i])
+			self._servo[i].SetA(A[i])
+			self._servo[i].SetT(T)
+			self._servo[i].SetPh(phase_diff[i])
 
-def oscillateServos(self, A[4], O[4], T, phase_diff[4], cycle=1):
-  for (int i=0; i<4; i++)    servo[i].SetO(O[i])
-    servo[i].SetA(A[i])
-    servo[i].SetT(T)
-    servo[i].SetPh(phase_diff[i])
+		ref = float(time.ticks_ms())
+		x = ref
+		While x <= T * cycle + ref:
+			for i in range(0, 5):
+				self._servo[i].refresh()
+			x = float(time.ticks_ms())
 
-  double ref=millis()
-   for (double x=ref; x<=T*cycle+ref; x=millis())     for (int i=0; i<4; i++)        servo[i].refresh()
+	def _execute(self, A, O, T, phase_diff, steps = 1.0):
+		self.attachServos()
+		if self.getRestState() == True:
+			self.setRestState(False)
 
-
-
-
-
-def _execute(self, A[4], O[4], T, phase_diff[4], steps = 1.0):
-  attachServos()
-  if getRestState()==True:        setRestState(False)
-
-
-
-  int cycles=(int)steps;    
-
-  #-- Execute complete cycles
-  if (cycles >= 1) 
-    for(i = 0; i < cycles; i++) 
-      oscillateServos(A,O, T, phase_diff)
-      
-  #-- Execute the final not complete cycle    
-  oscillateServos(A,O, T, phase_diff,(float)steps-cycles)
-
-
-
-#################################/
-#-- HOME = Otto at rest position -------------------------------#
-#################################/
-def home(self):
-  if(isOttoResting==False){ #Go to rest position only if necessary
-
-    int homes[4]={90, 90, 90, 90}; #All the servos at rest position
-    _moveServos(500,homes);   #Move the servos in half a second
-
-    detachServos()
-    isOttoResting=True
+		#-- Execute complete cycles
+		cycles = int(steps)
+		if cycles >= 1:
+			i = 0
+			while i < cycles:
+				self.oscillateServos(A,O, T, phase_diff)
+				i += 1
+		#-- Execute the final not complete cycle    
+  		self.oscillateServos(A,O, T, phase_diff, float(steps - cycles))
 
 
 
-def getRestState(self):
-    return isOttoResting
+	#-- HOME = Otto at rest position
+	def home(self):
+		if self.getRestState() == False:	# Go to rest position only if necessary
+			homes = [90, 90, 90, 90]	# All the servos at rest position
+			self._moveServos(500, homes)	# Move the servos in half a second
+			self.detachServos()
+			self.setRestState(True)
+	def getRestState(self):
+		return self._isOttoResting
+
+	def setRestState(self, state):
+		self._isOttoResting = state
 
 
-def setRestState(self, state):
-    isOttoResting = state
-
-
+#end
 
 #################################/
 #-- PREDETERMINED MOTION SEQUENCES -----------------------------#
