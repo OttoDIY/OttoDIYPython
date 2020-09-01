@@ -1,5 +1,5 @@
 """
-OttoDIY Python Project, 2020 
+OttoDIY Python Project, 2020 | sfranzyshen
 """
 
 import oscillator, time, math
