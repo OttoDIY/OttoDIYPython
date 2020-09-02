@@ -15,9 +15,11 @@ BIG = 30
 
 def DEG2RAD(g):
 	return (g * math.pi) / 180
+  
 class Eeprom:
 	def read(i):
-		pass
+		return 0
+
 	def write(i, trim):
 		pass
 
@@ -43,7 +45,7 @@ class Otto9:
 		self.setRestState(False)
 		if load_calibration == True:
 			for i in range(0, 5):
-				servo_trim = EEPROM.read(i) #-- FIXME add some sort of eeprom emulation
+				servo_trim = EEPROM.read(i)
 				#servo_trim = 0
 				if servo_trim > 128:
 					servo_trim -= 256
@@ -71,7 +73,7 @@ class Otto9:
 
 	def saveTrimsOnEEPROM(self):
 		for i in range(0, 5):
-			EEPROM.write(i, self._servo[i].getTrim()) #-- FIXME add some sort of eeprom emulation
+			EEPROM.write(i, self._servo[i].getTrim())
 			#pass
 
 	#-- BASIC MOTION FUNCTIONS
