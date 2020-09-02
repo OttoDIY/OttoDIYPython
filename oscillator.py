@@ -56,6 +56,7 @@ class Oscillator:
 
 	#-- Detach an oscillator from his servo
 	def detach(self):
+
 		if self._servo.attached(): #-- If the oscillator is attached,
 			self._servo.detach()
 
@@ -89,6 +90,7 @@ class Oscillator:
 	def getTrim(self):
 		return self._trim
 
+
 	#-- Stop
 	def Stop(self):
 		self._stop = True
@@ -118,7 +120,7 @@ class Oscillator:
 	def refresh(self):
 		if self.__next_sample(): #-- Only When TS milliseconds have passed, sample is obtained
 			if not self._stop: #-- If the oscillator is not stopped, the servo position
-				self._pos = math.round(self._A * math.sin(self._phase + self._phase0) + self._O) #-- Sample the sine function and set the servo pos
+				self._pos = round(self._A * math.sin(self._phase + self._phase0) + self._O) #-- Sample the sine function and set the servo pos
 				if self._rev: 
 					self._pos = -self._pos
 				self._servo.write(self._pos + 90 + self._trim)
@@ -127,6 +129,3 @@ class Oscillator:
 			#-- It is always increased, when the oscillator is stop
 			#-- so that the coordination is always kept
 			self._phase = self._phase + self._inc
-
-
-#end
