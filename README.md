@@ -13,5 +13,26 @@ The Motion Code has been ported ... and a test file has been created ... to test
 
 `>>> exec(open('./Otto_allmoves_V9.py').read(),globals())`
 
+### Example Code
+```
+"""
+Otto All moves python test 
+OttDIY Python Project, 2020 | sfranzyshen
+"""
+import otto9, time
 
+Otto = otto9.Otto9()
+Otto.init(5, 12, 13, 14, True, 0, 1, 2, 3)
+Otto.home()
 
+Otto.walk(2, 1000, 1) #-- 2 steps, "TIME". IF HIGHER THE VALUE THEN SLOWER (from 600 to 1400), 1 FORWARD
+Otto.walk(2, 1000, -1) #-- 2 steps, T, -1 BACKWARD 
+Otto.turn(2, 1000, 1) #-- 3 steps turning LEFT
+Otto.home()
+time.sleep_ms(100)  
+Otto.turn(2, 1000, -1) #-- 3 steps turning RIGHT 
+Otto.bend(1, 500, 1) #-- usually steps =1, T=2000
+Otto.bend(1, 2000, -1)     
+Otto.shakeLeg(1, 1500, 1)
+Otto.home()
+```
