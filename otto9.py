@@ -44,23 +44,22 @@ class Otto9:
 		self.attachServos()
 		self.setRestState(False)
 		if load_calibration == True:
-			for i in range(0, 5):
+			for i in range(0, 4):
 				servo_trim = EEPROM.read(i)
-				#servo_trim = 0
 				if servo_trim > 128:
 					servo_trim -= 256
 				self._servo[i].SetTrim(servo_trim)
-		for i in range(0, 5):			#-- this could be eliminated as we already initialize 
+		for i in range(0, 4):			#-- this could be eliminated as we already initialize 
 			self._servo_position[i] = 90	#-- the array from __init__() above ...
 
 	#-- ATTACH & DETACH FUNCTIONS
 	
 	def attachServos(self):
-		for i in range(0, 5):
+		for i in range(0, 4):
 			self._servo[i].attach(self._servo_pins[i])
 
 	def detachServos(self):
-		for i in range(0, 5):
+		for i in range(0, 4):
 			self._servo[i].detach()
 
 	#-- OSCILLATORS TRIMS
@@ -72,32 +71,31 @@ class Otto9:
 		self._servo[3].SetTrim(RR)
 
 	def saveTrimsOnEEPROM(self):
-		for i in range(0, 5):
+		for i in range(0, 4):
 			EEPROM.write(i, self._servo[i].getTrim())
-			#pass
 
 	#-- BASIC MOTION FUNCTIONS
 
-	def _moveServos(self, time, servo_target):
+	def _moveServos(self, T, servo_target):
 		self.attachServos()
 		if self.getRestState() == True:
 			self.setRestState(False)
-		if time > 10:
-			for i in range(0, 5):
-				self._increment[i] = ((servo_target[i]) - self._servo_position[i]) / (time / 10.0)
-			self._final_time = time.ticks_ms() + time
+		if T > 10:
+			for i in range(0, 4):
+				self._increment[i] = ((servo_target[i]) - self._servo_position[i]) / (T / 10.0)
+			self._final_time = time.ticks_ms() + T
 			iteration = 1
 			while time.ticks_ms() < self._final_time:
 				self._partial_time = time.ticks_ms() + 10
-				for i in range(0, 5):
-					self._servo[i].SetPosition(self._servo_position[i] + (iteration * self._increment[i]))
+				for i in range(0, 4):
+					self._servo[i].SetPosition(int(self._servo_position[i] + (iteration * self._increment[i])))
 				while time.ticks_ms() < self._partial_time:
 					pass # pause
 				iteration += 1
 		else:
-			for i in range(0, 5):
+			for i in range(0, 4):
 				self._servo[i].SetPosition(servo_target[i])
-		for i in range(0, 5):
+		for i in range(0, 4):
 			self._servo_position[i] = servo_target[i]
 
 	def _moveSingle(self, position, servo_number):
@@ -110,7 +108,7 @@ class Otto9:
 		self._servo_position[servo_number] = position
 
 	def oscillateServos(self, A, O, T, phase_diff, cycle = 1.0):
-		for i in range(0, 5):
+		for i in range(0, 4):
 			self._servo[i].SetO(O[i])
 			self._servo[i].SetA(A[i])
 			self._servo[i].SetT(T)
@@ -119,7 +117,7 @@ class Otto9:
 		ref = float(time.ticks_ms())
 		x = ref
 		while x <= T * cycle + ref:
-			for i in range(0, 5):
+			for i in range(0, 4):
 				self._servo[i].refresh()
 			x = float(time.ticks_ms())
 
@@ -240,7 +238,7 @@ class Otto9:
 		while i < steps:
 			self._moveServos(T2 / 2, bend1)
 			self._moveServos(T2 / 2, bend2)
-			time.sleep((T * 0.8) / 1000)
+			time.sleep_ms(int((T * 0.8)))
 			self._moveServos(500, homes)
 			i += 1
 
@@ -289,7 +287,7 @@ class Otto9:
 				self._moveServos(500, homes)	#-- Return to home position
 				i += 1
 			j += 1
-		time.sleep(T / 1000)
+		time.sleep_ms(T)
 
 	#-- Otto movement: up & down
 	#--  Parameters:
