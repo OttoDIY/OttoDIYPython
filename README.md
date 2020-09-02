@@ -11,7 +11,7 @@ The Motion Code has been ported ... and a test file has been created ... to test
 2) Upload these files on to the board ... Use uPyCraft or ampy
 3) run the Otto_allmoves_V9.py file from the REPL with the follwoing command
 
-`>>>import Otto_allmoves_V9`
+`>>> exec(open('./Otto_allmoves_V9.py').read(),globals())`
 
 
 
