@@ -9,7 +9,7 @@ The Motion Code has been ported ... and a test file has been created ... to test
 
 1) Install Micropython onto your microcontroller (I used a esp8266 nodemcu board)
 2) Upload these files on to the board ... Use uPyCraft or ampy
-3) run the Otto_allmoves_V9.py file from the REPL with the follwoing command
+3) run the Otto_allmoves_V9.py file from the REPL with the following command
 
 `>>> exec(open('./Otto_allmoves_V9.py').read(),globals())`
 
