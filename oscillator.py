@@ -1,9 +1,5 @@
 """
 MicroPython driver to Generate sinusoidal oscillations in the servos
-Requires a Pulse width modulation (PWM) pin. On the ESP8266 the 
-pins 0, 2, 4, 5, 12, 13, 14 and 15 are all support PWM. 
-The limitation is that they must all be at the same frequency, 
-and the frequency must be between 1Hz and 1kHz.
 Oscillator.pde: GPL license (c) Juan Gonzalez-Gomez (Obijuan), 2011
 OttoDIY Python Project, 2020 | sfranzyshen
 """
