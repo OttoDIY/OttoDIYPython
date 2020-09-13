@@ -3,7 +3,7 @@ MicroPython driver to Generate sinusoidal oscillations in the servos
 Oscillator.pde: GPL license (c) Juan Gonzalez-Gomez (Obijuan), 2011
 OttoDIY Python Project, 2020 | sfranzyshen
 """
-import math, time, servo
+import math, time, otto_servo
 
 class Oscillator:
 	def __init__(self, trim = 0):
@@ -14,7 +14,7 @@ class Oscillator:
 		self._phase0 = 0.0	# Phase (radians)
 
 		# Internal variables
-		self._servo = servo.Servo() # Servo that is attached to the oscillator
+		self._servo = otto_servo.Servo() # Servo that is attached to the oscillator
 		self._pos = 0		# Current servo pos
 		self._trim = trim	# Calibration offset
 		self._phase = 0.0	# Current phase
