@@ -5,7 +5,7 @@ OttDIY Python Project, 2020 | sfranzyshen
 import machine
 
 class Servo:
-    def __init__(self, freq=50, min_us=24, max_us=115, max_ang=180):
+    def __init__(self, freq = 50, min_us = 24, max_us = 115, max_ang = 180):
         self.min_us = min_us
         self.max_us = max_us
         self.freq = freq
@@ -16,7 +16,7 @@ class Servo:
 
     def attach(self, pin):
         self.pin = machine.Pin(pin)
-        self.pwm = machine.PWM(self.pin, freq=self.freq, duty=0)
+        self.pwm = machine.PWM(self.pin, freq = self.freq, duty = 0)
         self._attached = True
 
     def detach(self):
