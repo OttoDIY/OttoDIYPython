@@ -33,7 +33,7 @@ class OttoMatrix:
         self.setIntensity(0x0f)
 
     def deinit(self):
-        print("OttoMatrix del called")
+#        print("OttoMatrix del called")
         self.spi.deinit()
         del(self.spi)
 
@@ -45,11 +45,11 @@ class OttoMatrix:
 
     #-- Clear all the leds and the buffers
     def clearMatrix(self):
-        for i in range(0,7):
+        for i in range(8):
             self.setColumnAll(i, 0)
             self.buffer[i] = 0
 
-        for i in range(0, 79):
+        for i in range(80):
             self.charBuffer[i] = 0
 
     #-- Send a command to the LED matrix
@@ -62,7 +62,7 @@ class OttoMatrix:
         buf[1] = value
         # we must first set the CS low
         self.cs.value(0)
-        for i in range(0, self.num):
+        for i in range(self.num):
             self.spi.write(buf)
         #we must set the CS HIGH
         self.cs.value(1)
@@ -81,7 +81,7 @@ class OttoMatrix:
 
         # we must first set the CS low
         self.cs.value(0)
-        for i in range(0, self.num):
+        for i in range(self.num):
             if i == n:
                 self.spi.write(buf)
             else:
@@ -103,7 +103,7 @@ class OttoMatrix:
 
         # we must first set the CS low
         self.cs.value(0)
-        for i in range(0, self.num):
+        for i in range(self.num):
             self.spi.write(buf)
             self.buffer[col * i] = value
         #we must set the CS HIGH
@@ -128,7 +128,7 @@ class OttoMatrix:
 
         # we must first set the CS low
         self.cs.value(0)
-        for i in range(0, self.num):
+        for i in range(self.num):
             if i == n:
                 self.spi.write(buf)
             else:
@@ -141,8 +141,8 @@ class OttoMatrix:
     #-- Parmeters:
     #--    value: 30 bits if led on/off info
     def writeFull(self, value):
-        for r in range(0, 4):
-            for c in range(0, 5):
+        for r in range(5):
+            for c in range(6):
                 bit = 1 & (value >> (r * 6 + c))
                 if self.rotation == 1:
                     self.setDot(6 - c, 7 - r, bit)
@@ -176,9 +176,9 @@ class OttoMatrix:
 
         #-- this is the last character so display them
         if number == pos + 1:
-            for c in range(0, 7):
+            for c in range(8):
                 value = self.charBuffer[c]
-                for r in range(0, 7):
+                for r in range(8):
                     bit = 1 & value >> r
                     if self.rotation == 1:
                         self.setDot(c, 7 - r, bit)
@@ -192,12 +192,12 @@ class OttoMatrix:
             #-- show the first character for longer
             time.sleep_ms(500)
 
-            for i in range(0, number * 8 - 2):
+            for i in range(number * 8 - 1):
                 self.charBuffer[i] = self.charBuffer[i + 1]
-                for c in range(0, 7):
+                for c in range(8):
                     bv = self.charBuffer[c + 1 + i]
-                    for r in range(0, 7):
-                        bit = 1 & value >> r
+                    for r in range(8):
+                        bit = 1 & bv >> r
                         if self.rotation == 1:
                             self.setDot(c, 7 - r, bit)
                         if self.rotation == 2:
