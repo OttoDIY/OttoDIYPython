@@ -52,6 +52,9 @@ class us:
         """
         pulse_time = self._send_pulse_and_wait()
 
+        if pulse_time < 0:
+            return 4000
+        
         # To calculate the distance we get the pulse_time and divide it by 2 
         # (the pulse walk the distance twice) and by 29.1 becasue
         # the sound speed on air (343.2 m/s), that It's equivalent to
@@ -66,6 +69,9 @@ class us:
         It returns a float
         """
         pulse_time = self._send_pulse_and_wait()
+
+        if pulse_time < 0:
+            return 400
 
         # To calculate the distance we get the pulse_time and divide it by 2 
         # (the pulse walk the distance twice) and by 29.1 because

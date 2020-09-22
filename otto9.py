@@ -2,11 +2,12 @@
 OttoDIY Python Project, 2020 | sfranzyshen
 """
 
-import oscillator, time, math
+import oscillator, time, math, store
 from us import us
-from machine import Pin
-from machine import PWM
-import songs, notes
+from machine import Pin, PWM
+import songs, notes, mouths, gestures
+import otto_matrix
+
 
 #-- Constants
 FORWARD = 1
@@ -20,15 +21,6 @@ BIG = 30
 def DEG2RAD(g):
 	return (g * math.pi) / 180
   
-class Eeprom:
-	def read(i):
-		return 0
-
-	def write(i, trim):
-		pass
-
-EEPROM = Eeprom
-
 class Otto9:
 	def __init__(self):
 		self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator()]
@@ -44,6 +36,11 @@ class Otto9:
 		self.buzzer = -1
 		self.noiseSensor = -1
 		
+	def deinit(self):
+		print("Otto9 del called we can clean up")
+		if hasattr(self, 'ledmatrix'):
+			self.ledmatrix.deinit()
+			
 	def init(self, YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):  
 		self._servo_pins[0] = YL
 		self._servo_pins[1] = YR
@@ -52,8 +49,9 @@ class Otto9:
 		self.attachServos()
 		self.setRestState(False)
 		if load_calibration == True:
+			trims = store.load('Trims', [0, 0, 0, 0])
 			for i in range(0, 4):
-				servo_trim = EEPROM.read(i)
+				servo_trim = trims[i] 
 				if servo_trim > 128:
 					servo_trim -= 256
 				self._servo[i].SetTrim(servo_trim)
@@ -71,7 +69,23 @@ class Otto9:
 		if self.buzzer >= 0:
 			self.buzzerPin = Pin(self.buzzer, Pin.OUT)
 			self.buzzerPin.value(0)
+
 			
+	#-- Otto LED matrix init
+	#-- Parameters:
+	#--    din: data pin number
+	#--    cs: chip select pin number
+	#--    clk: clock pin number
+	#--    rotate: orientation of LED matric
+	def initMATRIX(self, din, cs, clk, rotate):
+		self.ledmatrix = otto_matrix.OttoMatrix(din, cs, clk, rotate)
+
+	#-- Otto LED matrix set intensity
+	#-- Parameters:
+	#--    intensity: how bright should the LED metrix be
+	def matrixIntensity(self, intensity):
+		self.ledmatrix.setIntensity(intensity)
+
 	#-- ATTACH & DETACH FUNCTIONS
 	
 	def attachServos(self):
@@ -91,8 +105,10 @@ class Otto9:
 		self._servo[3].SetTrim(RR)
 
 	def saveTrimsOnEEPROM(self):
+		trims = [0, 0, 0, 0]
 		for i in range(0, 4):
-			EEPROM.write(i, self._servo[i].getTrim())
+			trims[i] = self._servo[i].getTrim()
+		store.save('Trims', trims)
 
 	#-- BASIC MOTION FUNCTIONS
 
@@ -452,6 +468,66 @@ class Otto9:
 	def getDistance(self):
 		return self.us.distance_cm()
 
+	#--   Mouths & Animations
+	
+	#-- setLed in matrix
+	#-- Parameters:
+	#--    x: x of led 0-7
+	#--    y: y of led 0-7
+	#--    value: on of off (1 or 0)
+	def setLed(self, x, y, value):
+		if hasattr(self, 'ledmatrix'):
+			self.ledmatrix.setDot(x, y, value)
+
+	#-- putAnimationMouth in matrix
+	#-- Parameters:
+	#--    mouth: which mouth array to use
+	#--    index: index of mouth to use
+	def putAnimationMouth(self, mouth, index):
+		if hasattr(self, 'ledmatrix'):
+			try:
+				self.ledmatrix.writeFull(mouths.aniMouths[mouth][index])
+			except:
+				pass
+
+	#-- putMouth in matrix
+	#-- Parameters:
+	#--    mouth: either a bitarray of the mouth or an index into the mouth dictonary
+	def putMouth(self, mouth):
+		if hasattr(self, 'ledmatrix'):
+			if type(mouth) == bytes or type(mouth) == bytearray:
+				self.ledmatrix.writeFull(mouth)
+			else:
+				try:
+					bits = mouths.mouths[mouth]
+					self.ledmatrix.writeFull(bits)
+				except:
+					pass
+
+	#-- clear the mouth
+	#-- Parameters:
+	def clearMouth(self):
+		if hasattr(self, 'ledmatrix'):
+			self.ledmatrix.clearMatrix()
+
+	
+	#-- write text to matrix
+	#-- Parameters:
+	#--    txt: text to display
+	#--    scrollspeed
+	def writeText(self, txt, scrollspeed):
+		if hasattr(self, 'ledmatrix'):
+			uTxt = txt.upper()
+			a = len(uTxt)
+			if a > 9:
+				b = 9
+			else:
+				b = a
+			for charNumber in range(0, b - 1):
+				self.ledmatrix.sendChar(uTxt[charNumber], charNumber, b, scrollspeed)
+
+	#-- Tone stuff
+
 	#-- Otto play tone
 	#-- Parameters:
 	#--    freq: Frequency of tone
@@ -562,5 +638,142 @@ class Otto9:
 			self.bendTones(1600, 4000, 1.02, 2, 20)
 			self.bendTones(4000, 3000, 1.02, 2, 20)
 
-			
+	#-- Gestures
+
+	#-- Play Gesture
+	#-- Parameters:
+	#--    gesture: which gesture to do
+	def playGesture(self, gesture):
+		if gesture == gestures.OTTOHAPPY:
+			self._tone(notes.E5, 50, 30)
+			self.putMouth(mouths.SMILE)
+			self.sing(songs.HAPPYSHORT)
+			self.swing(1, 800, 20)
+			self.sing(songs.HAPPYSHORT)
+			self.home()
+			self.putMouth(mouths.HAPPYOPEN)
+		elif gesture == gestures.OTTOSUPERHAPPY:
+			self.putMouth(mouths.HAPPYOPEN)
+			self.sing(songs.HAPPY)
+			self.putMouth(mouths.HAPPYCLOSED)
+			self.tiptoeSwing(1, 500, 20)
+			self.putMouth(mouths.HAPPYOPEN)
+			self.sing(songs.SUPERHAPPY)
+			self.tiptoeSwing(1, 500, 20)
+			self.home()
+			self.putMouth(mouths.HAPPYOPEN)
+		elif gesture == gestures.OTTOSAD:
+			self.putMouth(mouths.SAD)
+			self._moveServos(700, [110, 70, 20, 160])
+			self.bendTones(880, 830, 1.02, 20, 200)
+			self.putMouth(mouths.SADCLOSED)
+			self.bendTones(830, 790, 1.02, 20, 200)  
+			self.putMouth(mouths.SADOPEN)
+			self.bendTones(790, 740, 1.02, 20, 200)
+			self.putMouth(mouths.SADCLOSED)
+			self.bendTones(740, 700, 1.02, 20, 200)
+			self.putMouth(mouths.SADOPEN);
+			self.bendTones(700, 669, 1.02, 20, 200)
+			self.putMouth(mouths.SAD)
+			time.sleep_ms(500)
+
+			self.home();
+			time.sleep_ms(300)
+			self.putMouth(mouths.HAPPYOPEN);
+		elif gesture == gestures.OTTOSLEEPING:
+			self._moveServos(700, [100, 80, 60, 120])
+			for i in range(0, 3):
+				self.putAnimationMouth(mouths.DREAMMOUTH,0)
+				self.bendTones (100, 200, 1.04, 10, 10)
+				self.putAnimationMouth(mouths.DREAMMOUTH,1)
+				self.bendTones (200, 300, 1.04, 10, 10)
+				self.putAnimationMouth(mouths.DREAMMOUTH,2)
+				self.bendTones (300, 500, 1.04, 10, 10)   
+				time.sleep_ms(500)
+				self.putAnimationMouth(mouths.DREAMMOUTH,1)
+				self.bendTones (400, 250, 1.04, 10, 1) 
+				self.putAnimationMouth(mouths.DREAMMOUTH,0)
+				self.bendTones (250, 100, 1.04, 10, 1) 
+				time.sleep_ms(500);
+
+			self.putMouth(mouths.LINEMOUTH)
+			self.sing(songs.CUDDLY)
+
+			self.home()
+			self.putMouth(mouths.HAPPYOPEN)
+		elif gesture == gestures.OTTOFART:
+			self._moveServos(500, [90, 90, 145, 122])
+			time.sleep_ms(300)
+			self.putMouth(mouths.LINEMOUTH)
+			self.sing(songs.FART1)
+			self.putMouth(mouths.TONGUEOUT)
+			time.sleep_ms(250)
+			self._moveServo(500, [90, 90, 80, 122])
+			time.sleep_ms(300)
+			self.putMouth(mouths.LINEMOUTH)
+			self.sing(songs.FART2)
+			self.putMouth(mouths.TONGUEOUT)
+			time.sleep_ms(250)
+			self._moveServos(500. [90, 90, 145, 80])
+			time.sleep_ms(300)
+			self.putMouth(mouths.LINEMOUTH)
+			self.sing(songs.FART3)
+			self.putMouth(mouths.TONGUEOUT)
+			time.sleep_ms(300)
+
+			self.home()
+			time.sleep_ms(500); 
+			self.putMouth(mouths.HAPPYOPEN);
+		elif gesture == gestures.OTTOCONFUSED:
+			self._moveServos(300, [110, 70, 90, 90])
+			self.putMouth(mouths.CONFUSED)
+			self.sing(songs.CONFUSED)
+			time.sleep_ms(500);
+
+			self.home()
+			self.putMouth(mouths.HAPPYOPEN)
+		elif gesture == gestures.OTTOLOVE:
+			self.putMouth(mouths.HEART)
+			self.sing(songs.CUDDLY)
+			self.crusaito(2, 1500, 25, 1)
+
+			self.home()
+			self.sing(songs.HAPPYSHORT)
+			self.putMouth(mouths.HAPPYOPEN)
+		elif gesture == gestures.OTTOANGRY:
+			self._moveServos(300, [90, 90, 70, 110])
+			self.putMouth(mouths.ANGRY)
+
+			self._tone(notes.A5, 100, 30)
+			self.bendTones(notes.A5, notesD6, 1.02, 7, 4)
+			self.bendTones(notes.D6, notes.G6, 1.02, 10, 1)
+			self.bendTones(notes.G6, notes.A5, 1.02, 10, 1)
+			time.sleep_ms(15);
+			self.bendTones(notes.A5, notes.E5, 1.02, 20, 4)
+			time.sleep_ms(400)
+			self._moveServos(200, [110, 110, 90, 90])
+			self.bendTones(notes.A5, notes.D6, 1.02, 20, 4)
+			self._moveServos(200, [70, 70, 90, 90])
+			self.bendTones(notes.A5, notes.E5, 1.02, 20, 4)
+
+			self.home()
+			self.putMouth(mouths.HAPPYOPEN)
+		elif gesture == gestures.OTTOFRETFUL:
+			self.putMouth(mouths.ANGRY)
+			self.bendTones(notes.A5, notes.D6, 1.02, 20, 4)
+			self.bendTones(notes.A5, notes.E5, 1.02, 20, 4)
+			time.sleep_ms(300)
+			self.putMouth(mouths.LINEMOUTH)
+
+			for i in range(0, 3):
+				self._moveServos(100, [90, 90, 90, 110])
+				self.home()
+
+			self.putMouth(mouths.ANGRY)
+			time.sleep_ms(500)
+
+			self.home()
+			self.putMouth(mouths.HAPPYOPEN)
+
+
 #end
