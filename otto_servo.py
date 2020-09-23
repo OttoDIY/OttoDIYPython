@@ -1,7 +1,6 @@
-"""
-A simple class for controlling hobby servos. Modeled after the ESP8266 Arduino Servo Driver
-OttDIY Python Project, 2020
-"""
+#-- A simple class for controlling hobby servos. Modeled after the ESP8266 Arduino Servo Driver
+#-- OttDIY Python Project, 2020
+
 import machine
 
 class Servo:
