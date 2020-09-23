@@ -1,5 +1,6 @@
 #-- OttoDIY Python Project, 2020
 
+from micropython import const
 import oscillator, time, math, store
 from us import us
 from machine import Pin, PWM
@@ -7,18 +8,16 @@ import songs, notes, mouths, gestures
 import otto_matrix
 
 # -- Constants
-FORWARD = 1
-BACKWARD = -1
-LEFT = 1
-RIGHT = -1
-SMALL = 5
-MEDIUM = 15
-BIG = 30
-
+FORWARD = const(1)
+BACKWARD = const(-1)
+LEFT = const(1)
+RIGHT = const(-1)
+SMALL = const(5)
+MEDIUM = const(15)
+BIG = const(30)
 
 def DEG2RAD(g):
     return (g * math.pi) / 180
-
 
 class Otto9:
     def __init__(self):
@@ -84,7 +83,7 @@ class Otto9:
     def matrixIntensity(self, intensity):
         self.ledmatrix.setIntensity(intensity)
 
-    # -- ATTACH & DETACH FUNCTIONS
+    # -- Attach & Detach Functions
 
     def attachServos(self):
         for i in range(0, 4):
@@ -94,8 +93,7 @@ class Otto9:
         for i in range(0, 4):
             self._servo[i].detach()
 
-    # -- OSCILLATORS TRIMS
-
+    # -- Oscillator trims
     def setTrims(self, YL, YR, RL, RR):
         self._servo[0].SetTrim(YL)
         self._servo[1].SetTrim(YR)
@@ -108,8 +106,7 @@ class Otto9:
             trims[i] = self._servo[i].getTrim()
         store.save('Trims', trims)
 
-    # -- BASIC MOTION FUNCTIONS
-
+    # -- Basic Motion Functions
     def _moveServos(self, T, servo_target):
         self.attachServos()
         if self.getRestState() == True:
@@ -184,13 +181,12 @@ class Otto9:
     def setRestState(self, state):
         self._isOttoResting = state
 
-    # -- PREDETERMINED MOTION SEQUENCES
+    # -- Predetermined Motion Sequences
 
     # -- Otto movement: Jump
     # --  Parameters:
     # --    steps: Number of steps
     # --    T: Period
-
     def jump(self, steps, T):
         up = [90, 90, 150, 30]
         self._moveServos(T, up)
@@ -202,7 +198,6 @@ class Otto9:
     # --    * steps:  Number of steps
     # --    * T : Period
     # --    * Dir: Direction: FORWARD / BACKWARD
-
     def walk(self, steps, T, dir):
         # -- Oscillator parameters for walking
         # -- Hip sevos are in phase
@@ -223,7 +218,6 @@ class Otto9:
     # --   * Steps: Number of steps
     # --   * T: Period
     # --   * Dir: Direction: LEFT / RIGHT
-
     def turn(self, steps, T, dir):
         # -- Same coordination than for walking (see Otto.walk)
         # -- The Amplitudes of the hip's oscillators are not igual
@@ -247,7 +241,6 @@ class Otto9:
     # --    steps: Number of bends
     # --    T: Period of one bend
     # --    dir: RIGHT=Right bend LEFT=Left bend
-
     def bend(self, steps, T, dir):
         # -- Parameters of all the movements. Default: Left bend
         bend1 = [90, 90, 40, 35]
@@ -424,7 +417,6 @@ class Otto9:
         # --  is 60 degrees.
         # --  Both amplitudes are equal. The offset is half the amplitud plus a little bit of
         # -   offset so that the robot tiptoe lightly
-
         A = [0, 0, h, h]
         O = [0, 0, h / 2 + 2, -h / 2 - 2]
         phi = -dir * 90
