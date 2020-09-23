@@ -1,7 +1,6 @@
-"""
-Otto All moves python test 
-OttDIY Python Project, 2020 | sfranzyshen
-"""
+#-- Otto All moves python test 
+#-- OttDIY Python Project, 2020
+
 import otto9, time
 
 Otto = otto9.Otto9()
