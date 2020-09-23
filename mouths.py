@@ -1,4 +1,6 @@
-# Mouths sorted by numbers, and after, by happy to sad mouths
+#-- Mouths sorted by numbers, and after, by happy to sad mouths
+#-- OttDIY Python Project, 2020
+
 ZERO = 0
 ONE = 1
 TWO = 2
