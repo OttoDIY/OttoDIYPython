@@ -1,3 +1,5 @@
+#-- OttDIY Python Project, 2020
+
 font_6x8 = {
     '0': b'\x00\x7C\x82\x82\x7C\x00',
     '1': b'\x00\x42\xFE\x02\x00\x00',
