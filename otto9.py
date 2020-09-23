@@ -1,6 +1,4 @@
-"""
-OttoDIY Python Project, 2020 | sfranzyshen
-"""
+#-- OttoDIY Python Project, 2020
 
 import oscillator, time, math, store
 from us import us
