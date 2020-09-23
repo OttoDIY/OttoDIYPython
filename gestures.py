@@ -1,5 +1,7 @@
 
 #-- gestures supported by Otto
+#-- OttDIY Python Project, 2020
+
 OTTOHAPPY      = 0
 OTTOSUPERHAPPY = 1
 OTTOSAD        = 2
