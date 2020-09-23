@@ -1,8 +1,7 @@
-"""
-MicroPython driver to Generate sinusoidal oscillations in the servos
-Oscillator.pde: GPL license (c) Juan Gonzalez-Gomez (Obijuan), 2011
-OttoDIY Python Project, 2020 | sfranzyshen
-"""
+#-- MicroPython driver to Generate sinusoidal oscillations in the servos
+#-- Oscillator.pde: GPL license (c) Juan Gonzalez-Gomez (Obijuan), 2011
+#-- OttoDIY Python Project, 2020
+
 import math, time, otto_servo
 
 class Oscillator:
