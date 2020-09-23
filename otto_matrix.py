@@ -1,3 +1,5 @@
+#-- OttDIY Python Project, 2020
+
 from machine import Pin, SPI
 import otto_font, time
 
