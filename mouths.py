@@ -1,37 +1,39 @@
 #-- Mouths sorted by numbers, and after, by happy to sad mouths
 #-- OttDIY Python Project, 2020
 
-ZERO = 0
-ONE = 1
-TWO = 2
-THREE = 3
-FOUR = 4
-FIVE = 5
-SIX = 6
-SEVEN = 7
-EIGHT = 8
-NINE = 9
-SMILE = 10
-HAPPYOPEN = 11
-HAPPYCLOSED = 12
-HEART = 13
-BIGSURPRISE = 14
-SMALLSURPRISE = 15
-TONGUEOUT = 16
-VAMP1 = 17
-VAMP2 = 18
-LINEMOUTH = 19
-CONFUSED = 20
-DIAGONAL = 21
-SAD = 22
-SADOPEN = 23
-SADCLOSED = 24
-OKMOUTH = 25
-XMOUTH = 26
-INTERROGATION = 27
-THUNDER = 28
-CULITO = 29
-ANGRY = 30
+from micropython import const
+
+ZERO = const(0)
+ONE = const(1)
+TWO = const(2)
+THREE = const(3)
+FOUR = const(4)
+FIVE = const(5)
+SIX = const(6)
+SEVEN = const(7)
+EIGHT = const(8)
+NINE = const(9)
+SMILE = const(10)
+HAPPYOPEN = const(11)
+HAPPYCLOSED = const(12)
+HEART = const(13)
+BIGSURPRISE = const(14)
+SMALLSURPRISE = const(15)
+TONGUEOUT = const(16)
+VAMP1 = const(17)
+VAMP2 = const(18)
+LINEMOUTH = const(19)
+CONFUSED = const(20)
+DIAGONAL = const(21)
+SAD = const(22)
+SADOPEN = const(23)
+SADCLOSED = const(24)
+OKMOUTH = const(25)
+XMOUTH = const(26)
+INTERROGATION = const(27)
+THUNDER = const(28)
+CULITO = const(29)
+ANGRY = const(30)
 
 mouths = [
     0b00001100010010010010010010001100,  # zero_code
@@ -69,10 +71,10 @@ mouths = [
 
 # -- mouth animations
 
-LITTLEUUH = 0
-DREAMMOUTH = 1
-ADIVINAWI = 2
-WAVE = 3
+LITTLEUUH = const(0)
+DREAMMOUTH = const(1)
+ADIVINAWI = const(2)
+WAVE = const(3)
 
 aniMouths = [
     [
