@@ -1,4 +1,5 @@
 #-- Song CONSTANTS for otto9
+#-- OttDIY Python Project, 2020
 
 CONNECTION = 0
 DISCONNECTION = 1
