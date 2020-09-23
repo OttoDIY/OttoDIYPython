@@ -1,4 +1,5 @@
 #-- Note constants for otto9
+#-- OttDIY Python Project, 2020
 
 C0  = 16.35
 Db0 = 17.32
