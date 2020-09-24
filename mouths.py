@@ -1,8 +1,6 @@
 #-- Mouths sorted by numbers, and after, by happy to sad mouths
 #-- OttDIY Python Project, 2020
 
-from micropython import const
-
 ZERO = const(0)
 ONE = const(1)
 TWO = const(2)
