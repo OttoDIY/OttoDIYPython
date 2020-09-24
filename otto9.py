@@ -1,6 +1,5 @@
 #-- OttoDIY Python Project, 2020
 
-from micropython import const
 import oscillator, time, math, store
 from us import us
 from machine import Pin, PWM
