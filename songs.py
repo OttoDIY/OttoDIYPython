@@ -1,8 +1,6 @@
 #-- Song CONSTANTS for otto9
 #-- OttDIY Python Project, 2020
 
-from micropython import const
-
 CONNECTION = const(0)
 DISCONNECTION = const(1)
 BUTTONPUSHED = const(2)
