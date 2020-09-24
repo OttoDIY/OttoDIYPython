@@ -2,8 +2,6 @@
 #-- gestures supported by Otto
 #-- OttDIY Python Project, 2020
 
-from micropython import const
-
 OTTOHAPPY      = const(0)
 OTTOSUPERHAPPY = const(1)
 OTTOSAD        = const(2)
