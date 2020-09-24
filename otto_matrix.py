@@ -1,12 +1,13 @@
 #-- OttDIY Python Project, 2020
 
+from micropython import const
 from machine import Pin, SPI
 import otto_font, time
 
-DECODEMODE  = 0x09
-INTENSITY   = 0x0a
-SCANLIMIT   = 0x0b
-DISPLAYTEST = 0x0f
+DECODEMODE  = const(0x09)
+INTENSITY   = const(0x0a)
+SCANLIMIT   = const(0x0b)
+DISPLAYTEST = const(0x0f)
 
 class OttoMatrix:
     #-- initialize an LED matrix with all the pins
