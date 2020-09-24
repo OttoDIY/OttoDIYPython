@@ -1,6 +1,5 @@
 #-- OttDIY Python Project, 2020
 
-from micropython import const
 from machine import Pin, SPI
 import otto_font, time
 
