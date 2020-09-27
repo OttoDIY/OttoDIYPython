@@ -3,15 +3,22 @@
 import json
 import os
 
+STOREDIR = '/user'
+
 def save(key, value):
-    filename = '/user/' + key + '.json'
+    try:
+        stat = os.stat(STOREDIR)
+    except:
+        os.mkdir(STOREDIR)
+
+    filename = STOREDIR + '/' + key + '.json'
     f = open(filename, 'w')
     json_str = json.dumps(value)
     f.write(json_str)
     f.close()
 
 def load(key, default = None):
-    filename = '/user/' + key + '.json'
+    filename = STOREDIR + '/' + key + '.json'
 
     try:
         f = open(filename)

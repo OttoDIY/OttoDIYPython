@@ -76,7 +76,7 @@ class Otto9:
             self.buzzerPin.value(0)
 
     # --  Otto9Humanoid initialization (depreciated)
-    def initHUMANOID((self, YL, YR, RL, RR, LA, RA, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):
+    def initHUMANOID(self, YL, YR, RL, RR, LA, RA, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):
 	    self.init(YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA, RA)
 
     # -- Otto LED matrix init
@@ -109,7 +109,7 @@ class Otto9:
         self._servo[1].SetTrim(YR)
         self._servo[2].SetTrim(RL)
         self._servo[3].SetTrim(RR)
-        if self._servo_totals > 4
+        if self._servo_totals > 4:
             self._servo[4].SetTrim(LA)
             self._servo[5].SetTrim(RA)
 
