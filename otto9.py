@@ -465,6 +465,28 @@ class Otto9:
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
 
+    # -- Otto movement: Hands up
+    def handsup(self):
+  	if self._servo_totals > 4:
+	homes = [90, 90, 90, 90, 20, 160]
+	self._moveServos(1000, homes)
+
+    # -- Otto movement: Wave , either left or right
+    def handwave(self, dir):
+	if self._servo_totals > 4:
+		if dir == RIGHT:
+			A = [0, 0, 0, 0, 30, 0] 
+			O = [0, 0, 0, 0, -30, -40]
+			phase_diff = [0, 0, 0, 0, DEG2RAD(0),0]
+			# -- Let's oscillate the servos!
+			self._execute(A, O, 1000, phase_diff, 5)
+		if dir == LEFT:
+			A = [0, 0, 0, 0, 0, 30]
+			O = [0, 0, 0, 0, 40, 60]
+			phase_diff = [0, 0, 0, 0, 0, DEG2RAD(0)]
+			# -- Let's oscillate the servos!
+			self._execute(A, O, 1000, phase_diff, 1)
+
     # -- Otto get US distance
     # -- returns distance in cm
     def getDistance(self):
