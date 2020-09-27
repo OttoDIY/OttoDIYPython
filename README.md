@@ -5,6 +5,8 @@ This is a port of the OttoDIY Robot API ([Otto9.h](https://github.com/OttoDIY/Ot
 This project has just begun ... it's not ready for use yet ... [please look at 
 the issues](https://github.com/OttoDIY/OttoDIYPython/issues) to see if you can help make this a reality ...
 
+we now have added the humanoid support 😄 ... [Read this issue post](https://github.com/OttoDIY/OttoDIYPython/issues/17) to see how it's used ...
+
 The Motion Code has been ported ... and a test file has been created ... to test this out
 
 1) Install Micropython onto your microcontroller (I used a esp8266 nodemcu board)
