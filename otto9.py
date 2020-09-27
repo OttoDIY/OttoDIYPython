@@ -38,6 +38,7 @@ class Otto9:
     def deinit(self):
         if hasattr(self, 'ledmatrix'):
             self.ledmatrix.deinit()
+            self.detachServos()
 
     # --  Otto9 or Otto9Humanoid initialization
     def init(self, YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA = -1, RA = -1):
