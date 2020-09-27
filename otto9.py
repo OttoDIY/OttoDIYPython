@@ -468,8 +468,8 @@ class Otto9:
     # -- Otto movement: Hands up
     def handsup(self):
   	if self._servo_totals > 4:
-	homes = [90, 90, 90, 90, 20, 160]
-	self._moveServos(1000, homes)
+		homes = [90, 90, 90, 90, 20, 160]
+		self._moveServos(1000, homes)
 
     # -- Otto movement: Wave , either left or right
     def handwave(self, dir):
