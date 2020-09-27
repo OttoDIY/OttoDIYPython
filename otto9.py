@@ -7,27 +7,28 @@ import songs, notes, mouths, gestures
 import otto_matrix
 
 # -- Constants
-FORWARD = const(1)
+FORWARD  = const(1)
 BACKWARD = const(-1)
-LEFT = const(1)
-RIGHT = const(-1)
-SMALL = const(5)
-MEDIUM = const(15)
-BIG = const(30)
+LEFT     = const(1)
+RIGHT    = const(-1)
+SMALL    = const(5)
+MEDIUM   = const(15)
+BIG      = const(30)
 
 def DEG2RAD(g):
     return (g * math.pi) / 180
 
 class Otto9:
     def __init__(self):
-        self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(),
-                       oscillator.Oscillator()]
-        self._servo_pins = [0, 0, 0, 0]
-        self._servo_trim = [0, 0, 0, 0]
-        self._servo_position = [90, 90, 90, 90]  # -- initialised to what the oscillator code defaults to
+        self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(), 
+                       oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator()]
+        self._servo_pins = [-1, -1, -1, -1, -1, -1]
+        self._servo_trim = [0, 0, 0, 0, 0, 0]
+        self._servo_position = [90, 90, 90, 90, 90, 90]  # -- initialised to what the oscillator code defaults to
+        self._servo_totals = 0
         self._final_time = 0
         self._partial_time = 0
-        self._increment = [0, 0, 0, 0]
+        self._increment = [0, 0, 0, 0, 0, 0]
         self._isOttoResting = True
         self.usTrigger = -1
         self.usEcho = -1
@@ -38,21 +39,27 @@ class Otto9:
         if hasattr(self, 'ledmatrix'):
             self.ledmatrix.deinit()
 
-    def init(self, YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):
+    # --  Otto9 or Otto9Humanoid initialization
+    def init(self, YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA = -1, RA = -1):
         self._servo_pins[0] = YL
         self._servo_pins[1] = YR
         self._servo_pins[2] = RL
         self._servo_pins[3] = RR
+        self._servo_totals = 4
+        if LA != -1:
+            self._servo_pins[4] = LA
+            self._servo_pins[5] = RA
+            self._servo_totals = 6
         self.attachServos()
         self.setRestState(False)
         if load_calibration == True:
-            trims = store.load('Trims', [0, 0, 0, 0])
-            for i in range(0, 4):
+            trims = store.load('Trims', [0, 0, 0, 0, 0, 0])
+            for i in range(0, self._servo_totals):
                 servo_trim = trims[i]
                 if servo_trim > 128:
                     servo_trim -= 256
                 self._servo[i].SetTrim(servo_trim)
-        for i in range(0, 4):  # -- this could be eliminated as we already initialize
+        for i in range(0, self._servo_totals):  # -- this could be eliminated as we already initialize
             self._servo_position[i] = 90  # -- the array from __init__() above ...
 
         self.noiseSensor = NoiseSensor
@@ -66,6 +73,10 @@ class Otto9:
         if self.buzzer >= 0:
             self.buzzerPin = Pin(self.buzzer, Pin.OUT)
             self.buzzerPin.value(0)
+
+    # --  Otto9Humanoid initialization (depreciated)
+    def initHUMANOID((self, YL, YR, RL, RR, LA, RA, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):
+	    self.init(YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA, RA)
 
     # -- Otto LED matrix init
     # -- Parameters:
@@ -83,25 +94,27 @@ class Otto9:
         self.ledmatrix.setIntensity(intensity)
 
     # -- Attach & Detach Functions
-
     def attachServos(self):
-        for i in range(0, 4):
+        for i in range(0, self._servo_totals):
             self._servo[i].attach(self._servo_pins[i])
 
     def detachServos(self):
-        for i in range(0, 4):
+        for i in range(0, self._servo_totals):
             self._servo[i].detach()
 
     # -- Oscillator trims
-    def setTrims(self, YL, YR, RL, RR):
+    def setTrims(self, YL, YR, RL, RR, LA = 0, RA = 0):
         self._servo[0].SetTrim(YL)
         self._servo[1].SetTrim(YR)
         self._servo[2].SetTrim(RL)
         self._servo[3].SetTrim(RR)
+        if self._servo_totals > 4
+            self._servo[4].SetTrim(LA)
+            self._servo[5].SetTrim(RA)
 
     def saveTrimsOnEEPROM(self):
-        trims = [0, 0, 0, 0]
-        for i in range(0, 4):
+        trims = [0, 0, 0, 0, 0, 0]
+        for i in range(0, self._servo_totals):
             trims[i] = self._servo[i].getTrim()
         store.save('Trims', trims)
 
@@ -111,21 +124,21 @@ class Otto9:
         if self.getRestState() == True:
             self.setRestState(False)
         if T > 10:
-            for i in range(0, 4):
+            for i in range(0, self._servo_totals):
                 self._increment[i] = ((servo_target[i]) - self._servo_position[i]) / (T / 10.0)
             self._final_time = time.ticks_ms() + T
             iteration = 1
             while time.ticks_ms() < self._final_time:
                 self._partial_time = time.ticks_ms() + 10
-                for i in range(0, 4):
+                for i in range(0, self._servo_totals):
                     self._servo[i].SetPosition(int(self._servo_position[i] + (iteration * self._increment[i])))
                 while time.ticks_ms() < self._partial_time:
                     pass  # pause
                 iteration += 1
         else:
-            for i in range(0, 4):
+            for i in range(0, self._servo_totals):
                 self._servo[i].SetPosition(servo_target[i])
-        for i in range(0, 4):
+        for i in range(0, self._servo_totals):
             self._servo_position[i] = servo_target[i]
 
     def _moveSingle(self, position, servo_number):
@@ -138,7 +151,7 @@ class Otto9:
         self._servo_position[servo_number] = position
 
     def oscillateServos(self, A, O, T, phase_diff, cycle=1.0):
-        for i in range(0, 4):
+        for i in range(0, self._servo_totals):
             self._servo[i].SetO(O[i])
             self._servo[i].SetA(A[i])
             self._servo[i].SetT(T)
@@ -147,7 +160,7 @@ class Otto9:
         ref = float(time.ticks_ms())
         x = ref
         while x <= T * cycle + ref:
-            for i in range(0, 4):
+            for i in range(0, self._servo_totals):
                 self._servo[i].refresh()
             x = float(time.ticks_ms())
 
@@ -166,14 +179,6 @@ class Otto9:
         # -- Execute the final not complete cycle
         self.oscillateServos(A, O, T, phase_diff, float(steps - cycles))
 
-    # -- HOME = Otto at rest position
-    def home(self):
-        if self.getRestState() == False:  # -- Go to rest position only if necessary
-            homes = [90, 90, 90, 90]  # -- All the servos at rest position
-            self._moveServos(500, homes)  # -- Move the servos in half a second
-            self.detachServos()
-            self.setRestState(True)
-
     def getRestState(self):
         return self._isOttoResting
 
@@ -182,14 +187,22 @@ class Otto9:
 
     # -- Predetermined Motion Sequences
 
+    # -- Otto movement: HOME Otto at rest position
+    def home(self):
+        if self.getRestState() == False:  # -- Go to rest position only if necessary
+            homes = [90, 90, 90, 90, 90, 90]  # -- All the servos at rest position
+            self._moveServos(500, homes)  # -- Move the servos in half a second
+            self.detachServos()
+            self.setRestState(True)
+
     # -- Otto movement: Jump
     # --  Parameters:
     # --    steps: Number of steps
     # --    T: Period
     def jump(self, steps, T):
-        up = [90, 90, 150, 30]
+        up = [90, 90, 150, 30, 110, 70]
+        down = [90, 90, 90, 90, 90, 90]
         self._moveServos(T, up)
-        down = [90, 90, 90, 90]
         self._moveServos(T, down)
 
     # -- Otto gait: Walking  (forward or backward)
@@ -205,9 +218,9 @@ class Otto9:
         # --      -90 : Walk forward
         # --       90 : Walk backward
         # -- Feet servos also have the same offset (for tiptoe a little bit)
-        A = [30, 30, 20, 20]
-        O = [0, 0, 4, -4]
-        phase_diff = [0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90)]
+        A = [30, 30, 20, 20, 90, 90]
+        O = [0, 0, 4, -4, 0 , 0]
+        phase_diff = [0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90), 0, 0]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
@@ -222,9 +235,9 @@ class Otto9:
         # -- The Amplitudes of the hip's oscillators are not igual
         # -- When the right hip servo amplitude is higher, steps taken by
         # -- the right leg are bigger than the left. So, robot describes an left arc
-        A = [30, 30, 20, 20]
-        O = [0, 0, 4, -4]
-        phase_diff = [0, 0, DEG2RAD(-90), DEG2RAD(-90)]  # -- FIXME DEG2RAD()
+        A = [30, 30, 20, 20, 90, 90]
+        O = [0, 0, 4, -4, 0, 0]
+        phase_diff = [0, 0, DEG2RAD(-90), DEG2RAD(-90), 0, 0]
         if dir == LEFT:
             A[0] = 30  # -- Left hip servo
             A[1] = 10  # -- Right hip servo
@@ -242,9 +255,9 @@ class Otto9:
     # --    dir: RIGHT=Right bend LEFT=Left bend
     def bend(self, steps, T, dir):
         # -- Parameters of all the movements. Default: Left bend
-        bend1 = [90, 90, 40, 35]
-        bend2 = [90, 90, 40, 105]
-        homes = [90, 90, 90, 90]
+        bend1 = [90, 90, 40, 35, 120, 60]
+        bend2 = [90, 90, 40, 105, 60, 120]
+        homes = [90, 90, 90, 90, 90, 90]
 
         # -- Time of one bend, in order to avoid movements too fast.
         # T = max(T, 600)
@@ -278,10 +291,10 @@ class Otto9:
         numberLegMoves = 2
 
         # -- Parameters of all the movements. Default: Right leg
-        shake_leg1 = [90, 90, 40, 35]
-        shake_leg2 = [90, 90, 40, 120]
-        shake_leg3 = [90, 90, 70, 60]
-        homes = [90, 90, 90, 90]
+        shake_leg1 = [90, 90, 40, 35, 90, 90]
+        shake_leg2 = [90, 90, 40, 120, 100, 80]
+        shake_leg3 = [90, 90, 70, 60, 80, 100]
+        homes = [90, 90, 90, 90, 90, 90]
 
         # -- Changes in the parameters if right leg is chosen
         if dir == RIGHT:
@@ -326,9 +339,9 @@ class Otto9:
         # -- Feet amplitude and offset are the same
         # -- Initial phase for the right foot is -90, that it starts
         # --   in one extreme position (not in the middle)
-        A = [0, 0, h, h]
-        O = [0, 0, h, -h]
-        phase_diff = [0, 0, DEG2RAD(-90), DEG2RAD(90)]
+        A = [0, 0, h, h, h, h]
+        O = [0, 0, h, -h, h, -h]
+        phase_diff = [0, 0, DEG2RAD(-90), DEG2RAD(90), DEG2RAD(-90), DEG2RAD(90)]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
@@ -341,9 +354,9 @@ class Otto9:
     def swing(self, steps, T, h):
         # -- Both feets are in phase. The offset is half the amplitude
         # -- It causes the robot to swing from side to side
-        A = [0, 0, h, h]
-        O = [0, 0, h / 2, -h / 2]
-        phase_diff = [0, 0, DEG2RAD(0), DEG2RAD(0)]
+        A = [0, 0, h, h, h, h]
+        O = [0, 0, h / 2, -h / 2, h, -h]
+        phase_diff = [0, 0, DEG2RAD(0), DEG2RAD(0), DEG2RAD(0), DEG2RAD(0)]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
@@ -356,9 +369,9 @@ class Otto9:
     def tiptoeSwing(self, steps, T, h):
         # -- Both feets are in phase. The offset is not half the amplitude in order to tiptoe
         # -- It causes the robot to swing from side to side
-        A = [0, 0, h, h]
-        O = [0, 0, h, -h]
-        phase_diff = [0, 0, 0, 0]
+        A = [0, 0, h, h, h, h]
+        O = [0, 0, h, -h, h, -h]
+        phase_diff = [0, 0, 0, 0, 0, 0]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
@@ -375,9 +388,9 @@ class Otto9:
         # --   in one extreme position (not in the middle)
         # -- h is constrained to avoid hit the feets
         h = min(25, h)
-        A = [h, h, 0, 0]
-        O = [0, 0, 0, 0]
-        phase_diff = [DEG2RAD(-90), DEG2RAD(90), 0, 0]
+        A = [h, h, 0, 0, 0, 0]
+        O = [0, 0, 0, 0, 0, 0]
+        phase_diff = [DEG2RAD(-90), DEG2RAD(90), 0, 0, 0, 0]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
@@ -393,9 +406,9 @@ class Otto9:
         # --   in one extreme position (not in the middle)
         # -- h is constrained to avoid hit the feets
         h = min(13, h)
-        A = [h, h, h, h]
-        O = [0, 0, h + 4, -h + 4]
-        phase_diff = [DEG2RAD(-90), DEG2RAD(90), DEG2RAD(-90), DEG2RAD(90)]
+        A = [h, h, h, h, 40, 40]
+        O = [0, 0, h + 4, -h + 4, 0, 0]
+        phase_diff = [DEG2RAD(-90), DEG2RAD(90), DEG2RAD(-90), DEG2RAD(90), 0, 0]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
@@ -416,10 +429,10 @@ class Otto9:
         # --  is 60 degrees.
         # --  Both amplitudes are equal. The offset is half the amplitud plus a little bit of
         # -   offset so that the robot tiptoe lightly
-        A = [0, 0, h, h]
-        O = [0, 0, h / 2 + 2, -h / 2 - 2]
+        A = [0, 0, h, h, h, h]
+        O = [0, 0, h / 2 + 2, -h / 2 - 2, -h, h]
         phi = -dir * 90
-        phase_diff = [0, 0, DEG2RAD(phi), DEG2RAD(-60 * dir + phi)]
+        phase_diff = [0, 0, DEG2RAD(phi), DEG2RAD(-60 * dir + phi), DEG2RAD(phi), DEG2RAD(phi)]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps);
@@ -431,9 +444,9 @@ class Otto9:
     # --     h: height (Values between 20 - 50)
     # --     dir:  Direction: LEFT / RIGHT
     def crusaito(self, steps, T, h, dir):
-        A = [25, 25, h, h]
-        O = [0, 0, h / 2 + 4, -h / 2 - 4]
-        phase_diff = [90, 90, DEG2RAD(0), DEG2RAD(-60 * dir)]
+        A = [25, 25, h, h, 0, 0]
+        O = [0, 0, h / 2 + 4, -h / 2 - 4, 0, 0]
+        phase_diff = [90, 90, DEG2RAD(0), DEG2RAD(-60 * dir), 0, 0]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps);
@@ -445,9 +458,9 @@ class Otto9:
     # --    h: height (Values between 10 - 30)
     # --    dir: direction: FOREWARD, BACKWARD
     def flapping(self, steps, T, h, dir):
-        A = [12, 12, h, h]
-        O = [0, 0, h - 10, -h + 10]
-        phase_diff = [DEG2RAD(0), DEG2RAD(180), DEG2RAD(-90 * dir), DEG2RAD(90 * dir)]
+        A = [12, 12, h, h, 0, 0]
+        O = [0, 0, h - 10, -h + 10, 0, 0]
+        phase_diff = [DEG2RAD(0), DEG2RAD(180), DEG2RAD(-90 * dir), DEG2RAD(90 * dir), 0, 0]
 
         # -- Let's oscillate the servos!
         self._execute(A, O, T, phase_diff, steps)
@@ -652,7 +665,7 @@ class Otto9:
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOSAD:
             self.putMouth(mouths.SAD)
-            self._moveServos(700, [110, 70, 20, 160])
+            self._moveServos(700, [110, 70, 20, 160, 90, 90])
             self.bendTones(880, 830, 1.02, 20, 200)
             self.putMouth(mouths.SADCLOSED)
             self.bendTones(830, 790, 1.02, 20, 200)
@@ -669,7 +682,7 @@ class Otto9:
             time.sleep_ms(300)
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOSLEEPING:
-            self._moveServos(700, [100, 80, 60, 120])
+            self._moveServos(700, [100, 80, 60, 120, 90, 90])
             for i in range(4):
                 self.putAnimationMouth(mouths.DREAMMOUTH, 0)
                 self.bendTones(100, 200, 1.04, 10, 10)
@@ -690,19 +703,19 @@ class Otto9:
             self.home()
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOFART:
-            self._moveServos(500, [90, 90, 145, 122])
+            self._moveServos(500, [90, 90, 145, 122, 90, 90])
             time.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART1)
             self.putMouth(mouths.TONGUEOUT)
             time.sleep_ms(250)
-            self._moveServo(500, [90, 90, 80, 122])
+            self._moveServo(500, [90, 90, 80, 122, 90, 90])
             time.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART2)
             self.putMouth(mouths.TONGUEOUT)
             time.sleep_ms(250)
-            self._moveServos(500.[90, 90, 145, 80])
+            self._moveServos(500.[90, 90, 145, 80, 90, 90])
             time.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART3)
@@ -713,7 +726,7 @@ class Otto9:
             time.sleep_ms(500)
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOCONFUSED:
-            self._moveServos(300, [110, 70, 90, 90])
+            self._moveServos(300, [110, 70, 90, 90, 90, 90])
             self.putMouth(mouths.CONFUSED)
             self.sing(songs.CONFUSED)
             time.sleep_ms(500)
@@ -729,7 +742,7 @@ class Otto9:
             self.sing(songs.HAPPYSHORT)
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOANGRY:
-            self._moveServos(300, [90, 90, 70, 110])
+            self._moveServos(300, [90, 90, 70, 110, 90, 90])
             self.putMouth(mouths.ANGRY)
 
             self._tone(notes.A5, 100, 30)
@@ -739,9 +752,9 @@ class Otto9:
             time.sleep_ms(15)
             self.bendTones(notes.A5, notes.E5, 1.02, 20, 4)
             time.sleep_ms(400)
-            self._moveServos(200, [110, 110, 90, 90])
+            self._moveServos(200, [110, 110, 90, 90, 90, 90])
             self.bendTones(notes.A5, notes.D6, 1.02, 20, 4)
-            self._moveServos(200, [70, 70, 90, 90])
+            self._moveServos(200, [70, 70, 90, 90, 90, 90])
             self.bendTones(notes.A5, notes.E5, 1.02, 20, 4)
 
             self.home()
@@ -754,7 +767,7 @@ class Otto9:
             self.putMouth(mouths.LINEMOUTH)
 
             for i in range(4):
-                self._moveServos(100, [90, 90, 90, 110])
+                self._moveServos(100, [90, 90, 90, 110, 90, 90])
                 self.home()
 
             self.putMouth(mouths.ANGRY)
@@ -809,12 +822,12 @@ class Otto9:
         elif gesture == gestures.OTTOVICTORY:
             self.putMouth(mouths.SMALLSURPRISE)
             for i in range(60):
-                self._moveServos(10, [9, 90, 90 + i, 90 - i])
+                self._moveServos(10, [9, 90, 90 + i, 90 - i, 90, 90])
                 self._tone(1600 + i * 20, 15, 1)
 
             self.putMouth(mouths.BIGSURPRISE)
             for i in range(60):
-                self._moveServos(10, [90, 90, 150 - i, 30 + i])
+                self._moveServos(10, [90, 90, 150 - i, 30 + i, 90, 90])
                 self._tone(2800 + i * 20, 15, 1)
 
             self.putMouth(mouths.HAPPYOPEN)
@@ -829,15 +842,15 @@ class Otto9:
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOFAIL:
             self.putMouth(mouths.SADOPEN)
-            self._moveServos(300, [90, 90, 70, 35])
+            self._moveServos(300, [90, 90, 70, 35, 90, 90])
             self._tone(900, 200, 1)
             self.putMouth(mouths.SADCLOSED)
-            self._moveServos(300, [90, 90, 55, 35])
+            self._moveServos(300, [90, 90, 55, 35, 90, 90])
             self._tone(600, 200, 1)
             self.putMouth(mouths.CONFUSED)
-            self._moveServos(300, [90, 90, 42, 35])
+            self._moveServos(300, [90, 90, 42, 35, 90, 90])
             self._tone(300, 200, 1)
-            self._moveServos(300, [90, 90, 34, 35])
+            self._moveServos(300, [90, 90, 34, 35, 90, 90])
             self.putMouth(mouths.XMOUTH)
 
             self.detachServos()
