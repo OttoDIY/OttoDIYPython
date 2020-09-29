@@ -1,10 +1,10 @@
 #-- Mouths sorted by numbers, and after, by happy to sad mouths
 #-- OttDIY Python Project, 2020
 
-ZERO = const(0)
-ONE = const(1)
-TWO = const(2)
-THREE = const(3)
+ZERO            = const(0)
+ONE             = const(1)
+TWO             = const(2)
+THREE           = const(3)
 FOUR            = const(4)
 FIVE            = const(5)
 SIX             = const(6)
