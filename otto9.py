@@ -1,4 +1,4 @@
-#-- OttoDIY Python Project, 2020
+# -- OttoDIY Python Project, 2020
 
 import oscillator, time, math, store
 from us import us
@@ -20,7 +20,7 @@ def DEG2RAD(g):
 
 class Otto9:
     def __init__(self):
-        self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(), 
+        self._servo = [oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator(),
                        oscillator.Oscillator(), oscillator.Oscillator(), oscillator.Oscillator()]
         self._servo_pins = [-1, -1, -1, -1, -1, -1]
         self._servo_trim = [0, 0, 0, 0, 0, 0]
@@ -38,7 +38,8 @@ class Otto9:
     def deinit(self):
         if hasattr(self, 'ledmatrix'):
             self.ledmatrix.deinit()
-            self.detachServos()
+
+        self.detachServos()
 
     # --  Otto9 or Otto9Humanoid initialization
     def init(self, YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA = -1, RA = -1):
@@ -77,7 +78,7 @@ class Otto9:
 
     # --  Otto9Humanoid initialization (depreciated)
     def initHUMANOID(self, YL, YR, RL, RR, LA, RA, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):
-	    self.init(YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA, RA)
+        self.init(YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA, RA)
 
     # -- Otto LED matrix init
     # -- Parameters:
@@ -220,7 +221,7 @@ class Otto9:
         # --       90 : Walk backward
         # -- Feet servos also have the same offset (for tiptoe a little bit)
         A = [30, 30, 20, 20, 90, 90]
-        O = [0, 0, 4, -4, 0 , 0]
+        O = [0, 0, 4, -4, 0, 0]
         phase_diff = [0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90), 0, 0]
 
         # -- Let's oscillate the servos!
@@ -468,25 +469,25 @@ class Otto9:
 
     # -- Otto movement: Hands up
     def handsup(self):
-  	if self._servo_totals > 4:
-		homes = [90, 90, 90, 90, 20, 160]
-		self._moveServos(1000, homes)
+        if self._servo_totals > 4:
+            homes = [90, 90, 90, 90, 20, 160]
+            self._moveServos(1000, homes)
 
     # -- Otto movement: Wave , either left or right
     def handwave(self, dir):
-	if self._servo_totals > 4:
-		if dir == RIGHT:
-			A = [0, 0, 0, 0, 30, 0] 
-			O = [0, 0, 0, 0, -30, -40]
-			phase_diff = [0, 0, 0, 0, DEG2RAD(0),0]
-			# -- Let's oscillate the servos!
-			self._execute(A, O, 1000, phase_diff, 5)
-		if dir == LEFT:
-			A = [0, 0, 0, 0, 0, 30]
-			O = [0, 0, 0, 0, 40, 60]
-			phase_diff = [0, 0, 0, 0, 0, DEG2RAD(0)]
-			# -- Let's oscillate the servos!
-			self._execute(A, O, 1000, phase_diff, 1)
+        if self._servo_totals > 4:
+            if dir == RIGHT:
+                A = [0, 0, 0, 0, 30, 0]
+                O = [0, 0, 0, 0, -30, -40]
+                phase_diff = [0, 0, 0, 0, DEG2RAD(0), 0]
+                # -- Let's oscillate the servos!
+                self._execute(A, O, 1000, phase_diff, 5)
+            if dir == LEFT:
+                A = [0, 0, 0, 0, 0, 30]
+                O = [0, 0, 0, 0, 40, 60]
+                phase_diff = [0, 0, 0, 0, 0, DEG2RAD(0)]
+                # -- Let's oscillate the servos!
+                self._execute(A, O, 1000, phase_diff, 1)
 
     # -- Otto get US distance
     # -- returns distance in cm
