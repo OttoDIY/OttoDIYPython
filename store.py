@@ -3,7 +3,7 @@
 import json
 import os
 
-STOREDIR = '/user'
+STOREDIR = '/eeprom'
 
 def save(key, value):
     try:
