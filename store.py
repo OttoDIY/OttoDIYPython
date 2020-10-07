@@ -5,6 +5,7 @@ import os
 
 STOREDIR = '/eeprom'
 
+
 def save(key, value):
     try:
         stat = os.stat(STOREDIR)
@@ -16,6 +17,7 @@ def save(key, value):
     json_str = json.dumps(value)
     f.write(json_str)
     f.close()
+
 
 def load(key, default = None):
     filename = STOREDIR + '/' + key + '.json'
