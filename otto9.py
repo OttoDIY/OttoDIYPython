@@ -2,7 +2,7 @@
 
 import oscillator, time, math, store
 from us import us
-from machine import Pin, PWM
+from machine import Pin, PWM, ADC
 import songs, notes, mouths, gestures
 import otto_matrix
 
@@ -76,6 +76,10 @@ class Otto9:
             self.buzzerPin = Pin(self.buzzer, Pin.OUT)
             self.buzzerPin.value(0)
 
+        if self.noiseSensor >= 0:
+            self.noiseSensorPin = ADC(Pin(NoiseSensor))
+            self.noiseSensorPin.atten(ADC.ATTN_11DB) # read the full voltage 0-3.3V
+
     # --  Otto9Humanoid initialization (depreciated)
     def initHUMANOID(self, YL, YR, RL, RR, LA, RA, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):
         self.init(YL, YR, RL, RR, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho, LA, RA)
@@ -106,13 +110,13 @@ class Otto9:
 
     # -- Oscillator trims
     def setTrims(self, YL, YR, RL, RR, LA = 0, RA = 0):
-        self._servo[0].SetTrim(YL)
-        self._servo[1].SetTrim(YR)
-        self._servo[2].SetTrim(RL)
-        self._servo[3].SetTrim(RR)
+        self._servo[0].SetTrim(0 if YL is None else YL)
+        self._servo[1].SetTrim(0 if YR is None else YR)
+        self._servo[2].SetTrim(0 if RL is None else RL)
+        self._servo[3].SetTrim(0 if RR is None else RR)
         if self._servo_totals > 4:
-            self._servo[4].SetTrim(LA)
-            self._servo[5].SetTrim(RA)
+            self._servo[4].SetTrim(0 if LA is None else LA)
+            self._servo[5].SetTrim(0 if RA is None else RA)
 
     def saveTrimsOnEEPROM(self):
         trims = [0, 0, 0, 0, 0, 0]
@@ -489,6 +493,14 @@ class Otto9:
                 # -- Let's oscillate the servos!
                 self._execute(A, O, 1000, phase_diff, 1)
 
+    # -- Otto read noise sensor analog
+    # -- return the reading
+    def getNoise(self):
+        if self.noiseSensor >= 0:
+            return self.noiseSensorPin.read()
+        else:
+            return 0
+
     # -- Otto get US distance
     # -- returns distance in cm
     def getDistance(self):
@@ -544,8 +556,8 @@ class Otto9:
         if hasattr(self, 'ledmatrix'):
             uTxt = txt.upper()
             a = len(uTxt)
-            if a > 9:
-                b = 9
+            if a > 19:
+                b = 19
             else:
                 b = a
             for charNumber in range(b):
