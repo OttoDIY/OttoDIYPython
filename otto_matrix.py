@@ -25,7 +25,7 @@ class OttoMatrix:
             rotation = 1
         self.rotation = rotation
         self.buffer = bytearray(8 * self.num)
-        self.charBuffer = bytearray(80)
+        self.charBuffer = bytearray(160)
 
         self.setCommand(SCANLIMIT, 0x07)
         self.setCommand(DECODEMODE, 0x00)
