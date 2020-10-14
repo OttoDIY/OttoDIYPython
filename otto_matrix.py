@@ -6,6 +6,7 @@ import otto_font, time
 DECODEMODE  = const(0x09)
 INTENSITY   = const(0x0a)
 SCANLIMIT   = const(0x0b)
+SHUTDOWN    = const(0x0c)
 DISPLAYTEST = const(0x0f)
 
 class OttoMatrix:
@@ -29,6 +30,7 @@ class OttoMatrix:
 
         self.setCommand(SCANLIMIT, 0x07)
         self.setCommand(DECODEMODE, 0x00)
+        self.setCommand(SHUTDOWN, 0x01)
         self.setCommand(DISPLAYTEST, 0x00)
 
         self.clearMatrix()
@@ -47,11 +49,11 @@ class OttoMatrix:
 
     #-- Clear all the leds and the buffers
     def clearMatrix(self):
-        for i in range(8):
+        for i in range(len(self.buffer)):
             self.setColumnAll(i, 0)
             self.buffer[i] = 0
 
-        for i in range(80):
+        for i in range(len(self.charBuffer)):
             self.charBuffer[i] = 0
 
     #-- Send a command to the LED matrix
@@ -173,41 +175,41 @@ class OttoMatrix:
             ch = otto_font.font_6x8['+']
 
         self.charBuffer[0 + charPos] = 0
-        self.charBuffer[1 + charPos : 6 + charPos] = ch 
+        self.charBuffer[1 + charPos: 6 + charPos] = ch
         self.charBuffer[7 + charPos] = 0
 
         #-- this is the last character so display them
-        if number == pos + 1:
+        if number == (pos + 1):
             for c in range(8):
                 value = self.charBuffer[c]
                 for r in range(8):
-                    bit = 1 & value >> r
+                    bit = 1 & (value >> r)
                     if self.rotation == 1:
                         self.setDot(c, 7 - r, bit)
                     if self.rotation == 2:
                         self.setDot(7 - c, r, bit)
                     if self.rotation == 3:
-                        self.setDot(c, r, bit)
+                        self.setDot(r, c, bit)
                     if self.rotation == 4:
-                        self.setDot(7 - c, 7 - r, bit)
+                        self.setDot(7 - r, 7 - c, bit)
 
             #-- show the first character for longer
             time.sleep_ms(500)
 
-            for i in range(number * 8 - 1):
+            for i in range((number * 8) - 1):
                 self.charBuffer[i] = self.charBuffer[i + 1]
                 for c in range(8):
                     bv = self.charBuffer[c + 1 + i]
                     for r in range(8):
-                        bit = 1 & bv >> r
+                        bit = 1 & (bv >> r)
                         if self.rotation == 1:
                             self.setDot(c, 7 - r, bit)
                         if self.rotation == 2:
                             self.setDot(7 - c, r, bit)
                         if self.rotation == 3:
-                            self.setDot(c, r, bit)
+                            self.setDot(r, c, bit)
                         if self.rotation == 4:
-                            self.setDot(7 - c, 7 - r, bit)
+                            self.setDot(7 - r, 7 - c, bit)
                 time.sleep_ms(scrollspeed)
 
-                self.clearMatrix()
+            self.clearMatrix()

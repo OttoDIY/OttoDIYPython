@@ -91,7 +91,7 @@ class Otto9:
     # --    clk: clock pin number
     # --    rotate: orientation of LED matric
     def initMATRIX(self, din, cs, clk, rotate):
-        self.ledmatrix = otto_matrix.OttoMatrix(din, cs, clk, rotate)
+        self.ledmatrix = otto_matrix.OttoMatrix(din, cs, clk, rotation=rotate)
 
     # -- Otto LED matrix set intensity
     # -- Parameters:
@@ -515,7 +515,14 @@ class Otto9:
     # --    value: on of off (1 or 0)
     def setLed(self, x, y, value):
         if hasattr(self, 'ledmatrix'):
-            self.ledmatrix.setDot(x, y, value)
+            if self.ledmatrix.rotation == 1:
+                self.ledmatrix.setDot(y, x, value)
+            elif self.ledmatrix.rotation == 2:
+                self.ledmatrix.setDot(7 - y, 7 - x, value)
+            elif self.ledmatrix.rotation == 3:
+                self.ledmatrix.setDot(7 - x, y, value)
+            else:
+                self.ledmatrix.setDot(x, 7 - y, value)
 
     # -- putAnimationMouth in matrix
     # -- Parameters:
@@ -531,9 +538,9 @@ class Otto9:
     # -- putMouth in matrix
     # -- Parameters:
     # --    mouth: either a bitarray of the mouth or an index into the mouth dictonary
-    def putMouth(self, mouth):
+    def putMouth(self, mouth, useMouths = False):
         if hasattr(self, 'ledmatrix'):
-            if type(mouth) == bytes or type(mouth) == bytearray:
+            if useMouths == False:
                 self.ledmatrix.writeFull(mouth)
             else:
                 try:
