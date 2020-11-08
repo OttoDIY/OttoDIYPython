@@ -15,8 +15,10 @@ SMALL    = const(5)
 MEDIUM   = const(15)
 BIG      = const(30)
 
+
 def DEG2RAD(g):
     return (g * math.pi) / 180
+
 
 class Otto9:
     def __init__(self):
@@ -621,18 +623,6 @@ class Otto9:
             self._tone(notes.E5, 50, 30)
             self._tone(notes.A6, 55, 25)
             self._tone(notes.E6, 50, 10)
-        elif songName == songs.BUTTONPUSHED:
-            self.bendTones(notes.E6, notes.G6, 1.03, 20, 2)
-            time.sleep_ms(30)
-            self.bendTones(notes.E6, notes.D7, 1.04, 10, 2)
-        elif songName == songs.MODE1:
-            self.bendTones(notes.E6, notes.A6, 1.02, 30, 10)
-        elif songName == songs.MODE2:
-            self.bendTones(notes.G6, notes.D7, 1.03, 30, 10)
-        elif songName == songs.MODE3:
-            self._tone(notes.E6, 50, 100)
-            self._tone(notes.G6, 50, 80)
-            self._tone(notes.D7, 300, 0)
         elif songName == songs.SURPRISE:
             self.bendTones(800, 2150, 1.02, 10, 1)
             self.bendTones(2149, 800, 1.03, 7, 1)
@@ -681,6 +671,18 @@ class Otto9:
         elif songName == songs.FART3:
             self.bendTones(1600, 4000, 1.02, 2, 20)
             self.bendTones(4000, 3000, 1.02, 2, 20)
+        elif songName == songs.MODE1:
+            self.bendTones(notes.E6, notes.A6, 1.02, 30, 10)
+        elif songName == songs.MODE2:
+            self.bendTones(notes.G6, notes.D7, 1.03, 30, 10)
+        elif songName == songs.MODE3:
+            self._tone(notes.E6, 50, 100)
+            self._tone(notes.G6, 50, 80)
+            self._tone(notes.D7, 300, 0)
+        elif songName == songs.BUTTONPUSHED:
+            self.bendTones(notes.E6, notes.G6, 1.03, 20, 2)
+            time.sleep_ms(30)
+            self.bendTones(notes.E6, notes.D7, 1.04, 10, 2)
 
     # -- Gestures
 
@@ -752,7 +754,7 @@ class Otto9:
             self.sing(songs.FART1)
             self.putMouth(mouths.TONGUEOUT)
             time.sleep_ms(250)
-            self._moveServo(500, [90, 90, 80, 122, 90, 90])
+            self._moveServos(500, [90, 90, 80, 122, 90, 90])
             time.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART2)
@@ -789,7 +791,7 @@ class Otto9:
             self.putMouth(mouths.ANGRY)
 
             self._tone(notes.A5, 100, 30)
-            self.bendTones(notes.A5, notesD6, 1.02, 7, 4)
+            self.bendTones(notes.A5, notes.D6, 1.02, 7, 4)
             self.bendTones(notes.D6, notes.G6, 1.02, 10, 1)
             self.bendTones(notes.G6, notes.A5, 1.02, 10, 1)
             time.sleep_ms(15)
