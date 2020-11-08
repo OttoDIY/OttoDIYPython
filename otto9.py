@@ -540,9 +540,9 @@ class Otto9:
     # -- putMouth in matrix
     # -- Parameters:
     # --    mouth: either a bitarray of the mouth or an index into the mouth dictonary
-    def putMouth(self, mouth, useMouths = False):
+    def putMouth(self, mouth, useMouths = True):
         if hasattr(self, 'ledmatrix'):
-            if useMouths == False:
+            if not useMouths:
                 self.ledmatrix.writeFull(mouth)
             else:
                 try:
