@@ -1,7 +1,8 @@
 import otto9
+import mouths
 from machine import RFCOMM
 from machine import Timer
-import time
+import utime
 
 
 class ottoRemote(otto9.Otto9):
@@ -172,7 +173,15 @@ class ottoRemote(otto9.Otto9):
         elif move[0] == 'T':
             self.sendAck()
             # 'T' is for buzzer
-            print("Otto buzzer freq=" + move[1] + " time=" + move[2])
+
+            if len(move) < 3:
+                # this is an error
+                super().putMouth(mouths.XMOUTH)
+                utime.sleep_ms(2000)
+                super().clearMouth()
+            else:
+                self.movePrint("Otto buzzer freq=" + move[1] + " time=" + move[2])
+                super()._tone(int(move[1]), int(move[2]), 1)
             self.sendFinalAck()
         else:
             self.sendAck()
@@ -190,12 +199,12 @@ class ottoRemote(otto9.Otto9):
             self.moveFunc(self.timer)
 
     def sendAck(self):
-        time.sleep_ms(30)
+        utime.sleep_ms(30)
         if self.rfComm.connected()[0] != 0:
             self.rfComm.write(0, "&&A%%\r")
 
     def sendFinalAck(self):
-        time.sleep_ms(30)
+        utime.sleep_ms(30)
         if self.rfComm.connected()[0] != 0:
             self.rfComm.write(0, "&&F%%\r")
 

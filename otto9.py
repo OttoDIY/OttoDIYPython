@@ -1,10 +1,12 @@
 # -- OttoDIY Python Project, 2020
 
-import oscillator, time, math, store
+from micropython import const
+import oscillator, utime, math, store
 from us import us
 from machine import Pin, PWM, ADC
 import songs, notes, mouths, gestures
 import otto_matrix
+import batReader9
 
 # -- Constants
 FORWARD  = const(1)
@@ -36,6 +38,7 @@ class Otto9:
         self.usEcho = -1
         self.buzzer = -1
         self.noiseSensor = -1
+        self.battery = None;
 
     def deinit(self):
         if hasattr(self, 'ledmatrix'):
@@ -56,7 +59,7 @@ class Otto9:
             self._servo_totals = 6
         self.attachServos()
         self.setRestState(False)
-        if load_calibration == True:
+        if load_calibration:
             trims = store.load('Trims', [0, 0, 0, 0, 0, 0])
             for i in range(0, self._servo_totals):
                 servo_trim = trims[i]
@@ -101,6 +104,12 @@ class Otto9:
     def matrixIntensity(self, intensity):
         self.ledmatrix.setIntensity(intensity)
 
+    # -- Otto battery init
+    # -- Parameters:
+    # --     pin: pin for battery read
+    def initBatLevel(self, batteryPin):
+        self.battery = batReader9.BatReader9(batteryPin)
+
     # -- Attach & Detach Functions
     def attachServos(self):
         for i in range(0, self._servo_totals):
@@ -129,18 +138,18 @@ class Otto9:
     # -- Basic Motion Functions
     def _moveServos(self, T, servo_target):
         self.attachServos()
-        if self.getRestState() == True:
+        if self.getRestState():
             self.setRestState(False)
         if T > 10:
             for i in range(0, self._servo_totals):
                 self._increment[i] = ((servo_target[i]) - self._servo_position[i]) / (T / 10.0)
-            self._final_time = time.ticks_ms() + T
+            self._final_time = utime.ticks_ms() + T
             iteration = 1
-            while time.ticks_ms() < self._final_time:
-                self._partial_time = time.ticks_ms() + 10
+            while utime.ticks_ms() < self._final_time:
+                self._partial_time = utime.ticks_ms() + 10
                 for i in range(0, self._servo_totals):
                     self._servo[i].SetPosition(int(self._servo_position[i] + (iteration * self._increment[i])))
-                while time.ticks_ms() < self._partial_time:
+                while utime.ticks_ms() < self._partial_time:
                     pass  # pause
                 iteration += 1
         else:
@@ -165,12 +174,12 @@ class Otto9:
             self._servo[i].SetT(T)
             self._servo[i].SetPh(phase_diff[i])
 
-        ref = float(time.ticks_ms())
+        ref = float(utime.ticks_ms())
         x = ref
         while x <= T * cycle + ref:
             for i in range(0, self._servo_totals):
                 self._servo[i].refresh()
-            x = float(time.ticks_ms())
+            x = float(utime.ticks_ms())
 
     def _execute(self, A, O, T, phase_diff, steps=1.0):
         self.attachServos()
@@ -285,7 +294,7 @@ class Otto9:
         while i < steps:
             self._moveServos(T2 / 2, bend1)
             self._moveServos(T2 / 2, bend2)
-            time.sleep_ms(int((T * 0.8)))
+            utime.sleep_ms(int((T * 0.8)))
             self._moveServos(500, homes)
             i += 1
 
@@ -334,7 +343,7 @@ class Otto9:
                 self._moveServos(500, homes)  # -- Return to home position
                 i += 1
             j += 1
-        time.sleep_ms(T)
+        utime.sleep_ms(T)
 
     # -- Otto movement: up & down
     # --  Parameters:
@@ -495,6 +504,11 @@ class Otto9:
                 # -- Let's oscillate the servos!
                 self._execute(A, O, 1000, phase_diff, 1)
 
+    # -- Otto get US distance
+    # -- returns distance in cm
+    def getDistance(self):
+        return self.us.distance_cm()
+
     # -- Otto read noise sensor analog
     # -- return the reading
     def getNoise(self):
@@ -503,10 +517,35 @@ class Otto9:
         else:
             return 0
 
-    # -- Otto get US distance
-    # -- returns distance in cm
-    def getDistance(self):
-        return self.us.distance_cm()
+    # -- Otto read battery percentage
+    # -- Parameters:
+    # -- output float percentage of battery left
+    def getBatteryLevel(self):
+        batteryLevel = 0.0
+        if self.battery is not None:
+            batteryLevel = self.battery.readBatPercent()
+            batteryReadings = 0.0
+            numReadings = 10
+            for i in range(numReadings):
+                batteryReadings += self.battery.readBatPercent()
+                utime.sleep_ms(1)
+            batteryLevel = batteryReadings / numReadings
+        return batteryLevel
+
+    # -- Otto read battery voltage
+    # -- Parameters:
+    # -- output float voltage of battery
+    def getBatteryVoltage(self):
+        batteryLevel = 0.0
+        if self.battery is not None:
+            batteryLevel = self.battery.readBatVoltage()
+            batteryReadings = 0.0
+            numReadings = 10
+            for i in range(numReadings):
+                batteryReadings += self.battery.readBatVoltage()
+                utime.sleep_ms(1)
+            batteryLevel = batteryReadings / numReadings
+        return batteryLevel
 
     # --   Mouths & Animations
 
@@ -585,9 +624,9 @@ class Otto9:
                 silentDur = 1
             # -- use 50% duty cycle
             pwm = PWM(self.buzzerPin, int(round(freq)), 512)
-            time.sleep_ms(duration)
+            utime.sleep_ms(duration)
             pwm.deinit()
-            time.sleep_ms(silentDur)
+            utime.sleep_ms(silentDur)
 
     # -- Otto bend tone from one tone to another
     # -- Parameters:
@@ -628,14 +667,14 @@ class Otto9:
             self.bendTones(2149, 800, 1.03, 7, 1)
         elif songName == songs.OHOOH:
             self.bendTones(880, 2000, 1.04, 8, 3)
-            time.sleep_ms(200)
+            utime.sleep_ms(200)
             i = 880
             while i < 2000:
                 self._tone(notes.C6, 10, 10)
                 i = i * 1.04
         elif songName == songs.OHOOH2:
             self.bendTones(1880, 3000, 1.03, 8, 3)
-            time.sleep_ms(200)
+            utime.sleep_ms(200)
             i = 1880
             while i < 3000:
                 self._tone(notes.C6, 10, 10)
@@ -645,18 +684,18 @@ class Otto9:
             self.bendTones(899, 650, 1.01, 18, 7)
         elif songName == songs.SLEEPING:
             self.bendTones(100, 500, 1.04, 10, 10)
-            time.sleep_ms(500)
+            utime.sleep_ms(500)
             self.bendTones(400, 100, 1.04, 10, 1)
         elif songName == songs.HAPPY:
             self.bendTones(1500, 2500, 1.05, 20, 8)
             self.bendTones(2499, 1500, 1.05, 25, 8)
         elif songName == songs.SUPERHAPPY:
             self.bendTones(2000, 6000, 1.05, 8, 3)
-            time.sleep_ms(50)
+            utime.sleep_ms(50)
             self.bendTones(5999, 2000, 1.05, 13, 2)
         elif songName == songs.HAPPYSHORT:
             self.bendTones(1500, 2000, 1.05, 15, 8)
-            time.sleep_ms(100)
+            utime.sleep_ms(100)
             self.bendTones(1900, 2500, 1.05, 10, 8)
         elif songName == songs.SAD:
             self.bendTones(880, 669, 1.02, 20, 200)
@@ -681,7 +720,7 @@ class Otto9:
             self._tone(notes.D7, 300, 0)
         elif songName == songs.BUTTONPUSHED:
             self.bendTones(notes.E6, notes.G6, 1.03, 20, 2)
-            time.sleep_ms(30)
+            utime.sleep_ms(30)
             self.bendTones(notes.E6, notes.D7, 1.04, 10, 2)
 
     # -- Gestures
@@ -721,10 +760,10 @@ class Otto9:
             self.putMouth(mouths.SADOPEN)
             self.bendTones(700, 669, 1.02, 20, 200)
             self.putMouth(mouths.SAD)
-            time.sleep_ms(500)
+            utime.sleep_ms(500)
 
             self.home()
-            time.sleep_ms(300)
+            utime.sleep_ms(300)
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOSLEEPING:
             self._moveServos(700, [100, 80, 60, 120, 90, 90])
@@ -735,12 +774,12 @@ class Otto9:
                 self.bendTones(200, 300, 1.04, 10, 10)
                 self.putAnimationMouth(mouths.DREAMMOUTH, 2)
                 self.bendTones(300, 500, 1.04, 10, 10)
-                time.sleep_ms(500)
+                utime.sleep_ms(500)
                 self.putAnimationMouth(mouths.DREAMMOUTH, 1)
                 self.bendTones(400, 250, 1.04, 10, 1)
                 self.putAnimationMouth(mouths.DREAMMOUTH, 0)
                 self.bendTones(250, 100, 1.04, 10, 1)
-                time.sleep_ms(500)
+                utime.sleep_ms(500)
 
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.CUDDLY)
@@ -749,32 +788,32 @@ class Otto9:
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOFART:
             self._moveServos(500, [90, 90, 145, 122, 90, 90])
-            time.sleep_ms(300)
+            utime.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART1)
             self.putMouth(mouths.TONGUEOUT)
-            time.sleep_ms(250)
+            utime.sleep_ms(250)
             self._moveServos(500, [90, 90, 80, 122, 90, 90])
-            time.sleep_ms(300)
+            utime.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART2)
             self.putMouth(mouths.TONGUEOUT)
-            time.sleep_ms(250)
+            utime.sleep_ms(250)
             self._moveServos(500, [90, 90, 145, 80, 90, 90])
-            time.sleep_ms(300)
+            utime.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART3)
             self.putMouth(mouths.TONGUEOUT)
-            time.sleep_ms(300)
+            utime.sleep_ms(300)
 
             self.home()
-            time.sleep_ms(500)
+            utime.sleep_ms(500)
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOCONFUSED:
             self._moveServos(300, [110, 70, 90, 90, 90, 90])
             self.putMouth(mouths.CONFUSED)
             self.sing(songs.CONFUSED)
-            time.sleep_ms(500)
+            utime.sleep_ms(500)
 
             self.home()
             self.putMouth(mouths.HAPPYOPEN)
@@ -794,9 +833,9 @@ class Otto9:
             self.bendTones(notes.A5, notes.D6, 1.02, 7, 4)
             self.bendTones(notes.D6, notes.G6, 1.02, 10, 1)
             self.bendTones(notes.G6, notes.A5, 1.02, 10, 1)
-            time.sleep_ms(15)
+            utime.sleep_ms(15)
             self.bendTones(notes.A5, notes.E5, 1.02, 20, 4)
-            time.sleep_ms(400)
+            utime.sleep_ms(400)
             self._moveServos(200, [110, 110, 90, 90, 90, 90])
             self.bendTones(notes.A5, notes.D6, 1.02, 20, 4)
             self._moveServos(200, [70, 70, 90, 90, 90, 90])
@@ -808,7 +847,7 @@ class Otto9:
             self.putMouth(mouths.ANGRY)
             self.bendTones(notes.A5, notes.D6, 1.02, 20, 4)
             self.bendTones(notes.A5, notes.E5, 1.02, 20, 4)
-            time.sleep_ms(300)
+            utime.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
 
             for i in range(4):
@@ -816,7 +855,7 @@ class Otto9:
                 self.home()
 
             self.putMouth(mouths.ANGRY)
-            time.sleep_ms(500)
+            utime.sleep_ms(500)
 
             self.home()
             self.putMouth(mouths.HAPPYOPEN)
@@ -838,8 +877,8 @@ class Otto9:
                     self.bendTones(noteM, noteM + 100, 1.04, 10, 10)
                     noteM -= 100
 
-            time.sleep_ms(300)
-            self.putMouth(mouths.HAPPYOPEN);
+            utime.sleep_ms(300)
+            self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOWAVE:
             for i in range(2):
                 noteW = 500
@@ -862,7 +901,7 @@ class Otto9:
                     noteW -= 101
 
             self.clearMouth()
-            time.sleep_ms(100)
+            utime.sleep_ms(100)
             self.putMouth(mouths.HAPPYOPEN)
         elif gesture == gestures.OTTOVICTORY:
             self.putMouth(mouths.SMALLSURPRISE)
@@ -901,7 +940,7 @@ class Otto9:
             self.detachServos()
             self._tone(150, 2200, 1)
 
-            time.sleep_ms(600)
+            utime.sleep_ms(600)
             self.clearMouth()
             self.putMouth(mouths.HAPPYOPEN)
             self.home()
