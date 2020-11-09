@@ -760,7 +760,7 @@ class Otto9:
             self.sing(songs.FART2)
             self.putMouth(mouths.TONGUEOUT)
             time.sleep_ms(250)
-            self._moveServos(500.[90, 90, 145, 80, 90, 90])
+            self._moveServos(500, [90, 90, 145, 80, 90, 90])
             time.sleep_ms(300)
             self.putMouth(mouths.LINEMOUTH)
             self.sing(songs.FART3)
@@ -839,7 +839,7 @@ class Otto9:
                     noteM -= 100
 
             time.sleep_ms(300)
-            self.putMouth(mouth.HAPPYOPEN);
+            self.putMouth(mouths.HAPPYOPEN);
         elif gesture == gestures.OTTOWAVE:
             for i in range(2):
                 noteW = 500

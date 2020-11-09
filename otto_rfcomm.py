@@ -159,7 +159,7 @@ class ottoRemote(otto9.Otto9):
             # 'L' is for mouth
             mouth = int(move[1], 2)
             self.movePrint("Otto mouth=" + hex(mouth))
-            super().putMouth(mouth)
+            super().putMouth(mouth, False)
             self.sendFinalAck()
         elif move[0] == 'N':
             # 'N' is for request noise
