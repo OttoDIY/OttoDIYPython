@@ -2,12 +2,13 @@
 
 from machine import Pin, ADC
 
-VOLTAGE_MAX = 3.3
+VOLTAGE_MAX = 3.6
 BAT_MAX = 4.5
 BAT_MIN = 3.25
 OFFSET = (100 * BAT_MIN)/(BAT_MAX - BAT_MIN)
 
-class batReader9:
+
+class BatReader9:
     def __init__(self, pin = 34):
         self.batPin = ADC(Pin(pin))
         self.batPin.atten(ADC.ATTN_11DB)
@@ -29,3 +30,6 @@ class batReader9:
         elif percent > 100:
             percent = 100
         return percent
+
+    def read(self):
+        return self.batPin.read()

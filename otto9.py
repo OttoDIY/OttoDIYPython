@@ -38,7 +38,7 @@ class Otto9:
         self.usEcho = -1
         self.buzzer = -1
         self.noiseSensor = -1
-        self.battery = None;
+        self.battery = None
 
     def deinit(self):
         if hasattr(self, 'ledmatrix'):
@@ -83,7 +83,7 @@ class Otto9:
 
         if self.noiseSensor >= 0:
             self.noiseSensorPin = ADC(Pin(NoiseSensor))
-            self.noiseSensorPin.atten(ADC.ATTN_11DB) # read the full voltage 0-3.3V
+            self.noiseSensorPin.atten(ADC.ATTN_11DB) # read the full voltage 0-3.6V
 
     # --  Otto9Humanoid initialization (depreciated)
     def initHUMANOID(self, YL, YR, RL, RR, LA, RA, load_calibration, NoiseSensor, Buzzer, USTrigger, USEcho):
@@ -263,7 +263,7 @@ class Otto9:
             A[1] = 30
 
         # -- Let's oscillate the servos!
-        self._execute(A, O, T, phase_diff, steps);
+        self._execute(A, O, T, phase_diff, steps)
 
     # -- Otto gait: Lateral bend
     # --  Parameters:
@@ -452,7 +452,7 @@ class Otto9:
         phase_diff = [0, 0, DEG2RAD(phi), DEG2RAD(-60 * dir + phi), DEG2RAD(phi), DEG2RAD(phi)]
 
         # -- Let's oscillate the servos!
-        self._execute(A, O, T, phase_diff, steps);
+        self._execute(A, O, T, phase_diff, steps)
 
     # -- Otto gait: Crusaito. A mixture between moonwalker and walk
     # --   Parameters:
@@ -466,7 +466,7 @@ class Otto9:
         phase_diff = [90, 90, DEG2RAD(0), DEG2RAD(-60 * dir), 0, 0]
 
         # -- Let's oscillate the servos!
-        self._execute(A, O, T, phase_diff, steps);
+        self._execute(A, O, T, phase_diff, steps)
 
     # -- Otto gait: Flapping
     # --  Parameters:

@@ -1,12 +1,12 @@
 import otto9
 import mouths
-from machine import RFCOMM
+from esp32 import RFCOMM
 from machine import Timer
 import utime
 
 
 class ottoRemote(otto9.Otto9):
-    def __init__(self, name = "Otto"):
+    def __init__(self, name = "Otto", prgId = "Otto_V9"):
         super().__init__()
         self.timer = Timer(0)
         self.pending = False
@@ -18,6 +18,7 @@ class ottoRemote(otto9.Otto9):
         self.commandDebug = False
         self.printMove = False
         self.moveDebug = False
+        self.prgId = prgId
 
         self.ottoMoves = [
             super().home,
@@ -51,7 +52,7 @@ class ottoRemote(otto9.Otto9):
         self.rfComm.deinit()
         super().deinit()
 
-    def moveFunc(self, timer):
+    def moveFunc(self, _):
         self.pending = False
         move = None
         if len(self.moveList) > 0:
@@ -100,7 +101,7 @@ class ottoRemote(otto9.Otto9):
                             ottoMove(actualMove[1], moveTime, moveSize)
                         elif actualMove[2] >= -1:
                             self.movePrint(ottoMove.__name__ + "(" + str(actualMove[1]) + ", " +
-                                  str(moveTime) + ", " + str(actualMove[2]) + ")")
+                                           str(moveTime) + ", " + str(actualMove[2]) + ")")
                             ottoMove(actualMove[1], moveTime, actualMove[2])
                         elif actualMove[2] < -1:
                             self.movePrint(ottoMove.__name__ + "(" + str(actualMove[1]) + ")")
@@ -145,9 +146,8 @@ class ottoRemote(otto9.Otto9):
         elif move[0] == 'I':
             # 'I' is for request program ID
             print("Otto request program ID")
-            prgId = 0.9
             if self.rfComm .connected()[0] != 0:
-                self.rfComm.write(0, "&&I " + str(prgId) + "%%\r")
+                self.rfComm.write(0, "&&I " + self.prgId + "%%\r")
         elif move[0] == 'K':
             self.sendAck()
             # 'K' is for sing
