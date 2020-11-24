@@ -1,6 +1,12 @@
 import otto9
 import mouths
-from esp32 import RFCOMM
+
+try:
+    from esp32 import RFCOMM
+except ImportError:
+    print("This version of micropython esp32 doesn't support RFCOMM")
+    raise ImportError
+
 from machine import Timer
 import utime
 
