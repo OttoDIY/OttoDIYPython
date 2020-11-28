@@ -530,7 +530,7 @@ class Otto9:
                 batteryReadings += self.battery.readBatPercent()
                 utime.sleep_ms(1)
             batteryLevel = batteryReadings / numReadings
-        return batteryLevel
+        return round(batteryLevel, 2)
 
     # -- Otto read battery voltage
     # -- Parameters:
@@ -545,7 +545,7 @@ class Otto9:
                 batteryReadings += self.battery.readBatVoltage()
                 utime.sleep_ms(1)
             batteryLevel = batteryReadings / numReadings
-        return batteryLevel
+        return round(batteryLevel, 2)
 
     # --   Mouths & Animations
 
