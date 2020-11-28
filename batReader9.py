@@ -2,10 +2,9 @@
 
 from machine import Pin, ADC
 
-VOLTAGE_MAX = 3.6
-BAT_MAX = 4.5
+MAX_VOLTAGE = 7.6
+BAT_MAX = 4.8
 BAT_MIN = 3.25
-OFFSET = (100 * BAT_MIN)/(BAT_MAX - BAT_MIN)
 
 
 class BatReader9:
@@ -15,7 +14,10 @@ class BatReader9:
         self.batPin.width(ADC.WIDTH_12BIT)
 
     def readBatVoltage(self):
-        volt = self.batPin.read() * VOLTAGE_MAX / 4096 * 2
+        try:
+            volt = round(self.batPin.raw_to_voltage(self.batPin.read()) * 2 / 1000.0, 2)
+        except AttributeError:
+            volt = round(self.batPin.read() * MAX_VOLTAGE / 4096.0, 2)
         if volt < BAT_MIN:
             volt = BAT_MIN
         elif volt > BAT_MAX:
@@ -24,7 +26,7 @@ class BatReader9:
         return volt
 
     def readBatPercent(self):
-        percent = self.readBatVoltage() * (100 / (BAT_MAX - BAT_MIN)) - OFFSET
+        percent = round((self.readBatVoltage() - BAT_MIN) / (BAT_MAX - BAT_MIN) * 100, 2)
         if percent < 0:
             percent = 0
         elif percent > 100:
