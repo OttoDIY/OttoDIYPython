@@ -8,7 +8,11 @@ try:
     useServo = True
 except ImportError:
     """This version of esp32 doesn't support Servo, use PWM instead"""
+    def espServo(_arg):
+        print("espServo not defined")
+        raise ImportError
     useServo = False
+
 
 class Servo:
     def __init__(self, freq = 50, min_us = 1000, max_us = 2000, max_ang = 180):
@@ -42,7 +46,7 @@ class Servo:
         self._attached = False
 
     def attached(self):
-        return(self._attached)
+        return self._attached
 
     def write_us(self, us):
         """Set the signal to be ``us`` microseconds long. Zero disables it."""
