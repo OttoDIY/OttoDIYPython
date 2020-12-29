@@ -17,7 +17,7 @@ class OttoMatrix:
     #--    clock: pin to use as clock
     #--    num: number of leds in chain
     #--    rotation: 1-4 rotation of LED
-    def __init__(self, data = 19, cs = 5, clock = 18, num = 1, rotation = 1):
+    def __init__(self, data = 5, cs = 18, clock = 19, num = 1, rotation = 1):
         self.spi = SPI(2, baudrate = 125000, polarity = 0, phase = 0, firstbit = SPI.MSB, sck = Pin(clock), mosi = Pin(data))
         self.cs = Pin(cs, Pin.OUT)
         self.cs.value(1) #start with the select high
