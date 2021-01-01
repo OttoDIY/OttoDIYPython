@@ -1,6 +1,12 @@
 import otto9
 import mouths
 
+import socket
+import network
+import websocket_helper
+import uwebsocket
+import ujson
+
 try:
     from esp32 import RFCOMM
 except ImportError:
@@ -12,7 +18,7 @@ import utime
 
 
 class ottoRemote(otto9.Otto9):
-    def __init__(self, name="Otto", prgId="Otto_V9"):
+    def __init__(self, name="Otto", prgId="Otto_V9", webPort=8181):
         super().__init__()
         self.timer = Timer(0)
         self.pending = False
@@ -25,6 +31,11 @@ class ottoRemote(otto9.Otto9):
         self.printCmd = False
         self.moveDebug = False
         self.prgId = prgId
+
+        self.listenSock = None
+        self.clientSock = None
+        self.webSock = None
+        self.webPort = webPort
 
         self.ottoMoves = [
             super().home,
@@ -53,6 +64,8 @@ class ottoRemote(otto9.Otto9):
             (super().handwave, -1, -2)
         ]
 
+        self.setupConn()
+
     def deinit(self):
         # we need to deinit rfComm
         self.rfComm.deinit()
@@ -69,7 +82,11 @@ class ottoRemote(otto9.Otto9):
         else:
             return
 
-        command = cmd['command']
+        # make sure command is in dict
+        if 'command' in cmd:
+            command = cmd['command']
+        else:
+            return
 
         self.savedCmd = None
 
@@ -207,17 +224,23 @@ class ottoRemote(otto9.Otto9):
         if cmd['src'] == 'RFCOMM':
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], "&&A%%\r")
+        elif cmd['src'] == 'WS':
+            cmd['sock'].write("Otto Ack")
 
     def sendResp(self, cmd, result):
         if cmd['src'] == 'RFCOMM':
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], '&&' + cmd['command'][0] + ' ' + result + '%%\r')
+        elif cmd['src'] == 'WS':
+            cmd['sock'].write("Otto response " + cmd['command'][0] + ' ' + result + '\n')
 
     def sendFinalAck(self, cmd):
         utime.sleep_ms(30)
         if cmd['src'] == 'RFCOMM':
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], "&&F%%\r")
+        elif cmd['src'] == 'WS':
+            cmd['sock'].write("Otto FinalAck")
 
     def rfRemoteCommand(self, ev):
         cmd = {
@@ -241,3 +264,65 @@ class ottoRemote(otto9.Otto9):
     def cmdPrint(self, cmdStr):
         if self.printCmd:
             print(cmdStr)
+
+    def wsRemoteCommand(self, clientSock):
+        if clientSock == self.clientSock:
+            strg = self.webSock.readline()
+
+            if len(strg) == 0:
+                # the connection is gone
+                self.webSock.close()
+                self.clientSock.close()
+                self.webSock = None
+                self.clientSock = None
+                return
+
+            try:
+                cmd = ujson.loads(strg)
+                cmd['src'] = "WS"
+                cmd['sock'] = self.webSock
+
+                if self.cmdDebug:
+                    print(cmd)
+                self.addCmd(cmd)
+            except:
+                pass
+
+    def acceptConn(self, listenSock):
+        cl, remote_addr = self.listenSock.accept()
+        print("\nOtto WS connection from:", remote_addr)
+
+        if self.clientSock is not None:
+            try:
+                self.webSock.close()
+                self.clientSock.close()
+            except:
+                pass
+            self.webSock = None
+            self.clientSock = None
+
+        self.clientSock = cl
+        websocket_helper.server_handshake(self.clientSock)
+        self.webSock = uwebsocket.websocket(self.clientSock, True)
+        self.clientSock.setblocking(False)
+        self.clientSock.setsockopt(socket.SOL_SOCKET, 20, self.wsRemoteCommand)
+
+    def setupConn(self):
+        if self.listenSock is not None:
+            self.listenSock.close()
+            self.listenSock = None
+
+        self.listenSock = socket.socket()
+        self.listenSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        ai = socket.getaddrinfo("0.0.0.0", self.webPort)
+        addr = ai[0][4]
+
+        self.listenSock.bind(addr)
+        self.listenSock.listen(1)
+        self.listenSock.setsockopt(socket.SOL_SOCKET, 20, self.acceptConn)
+        for i in (network.AP_IF, network.STA_IF):
+            iface = network.WLAN(i)
+            if iface.active():
+                print("Otto WS daemon started on ws://%s:%d" % (iface.ifconfig()[0], self.webPort))
+
