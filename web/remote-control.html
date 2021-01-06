@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Otto WS control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./lib/picnic/picnic.min.css">
+    <script type="text/javascript">
+
+        const HOME = 0;
+        const FORWARD = 1;
+        const BACKWARD = 2;
+        const LEFT_TURN = 3;
+        const RIGHT_TURN = 4;
+
+        const wsPort = 8181;
+        let output;
+        let websocket;
+
+        let speed = 1000;
+        let size  = 15;
+
+        function init()
+        {
+            output = document.getElementById("output");
+            testWebSocket();
+        }
+
+        function testWebSocket()
+        {
+            websocket = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + ":" + wsPort + "/");
+            websocket.onopen = function(evt) { onOpen(evt) };
+            websocket.onclose = function(evt) { onClose(evt) };
+            websocket.onmessage = function(evt) { onMessage(evt) };
+            websocket.onerror = function(evt) { onError(evt) };
+        }
+
+        function onOpen(evt)
+        {
+            writeToScreen("CONNECTED");
+            sendMove([HOME]);
+        }
+
+        function onClose(evt)
+        {
+            writeToScreen("DISCONNECTED");
+        }
+
+        function onMessage(evt)
+        {
+            writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
+        }
+
+        function onError(evt)
+        {
+            writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+        }
+
+        function sendMove(move)
+        {
+            let cmd = ['M'];
+
+            for (let i = 0; i < move.length ; i++)
+                cmd.push(move[i].toString())
+
+            let msg = {
+                type: "ottoCommand",
+                command: cmd,
+            };
+
+            writeToScreen("SENT: " + JSON.stringify(msg));
+            websocket.send(JSON.stringify(msg) + "\n");
+
+            if (move[0] !== HOME)
+            {
+                // if this wasn't a home move, then send home as well
+                sendMove([HOME]);
+            }
+        }
+
+        function doSend(message)
+        {
+            msg = {
+                type: "ottoCommand",
+                cmmand: ['M', '0'],
+            };
+
+            writeToScreen("SENT: " + JSON.stringify(msg));
+            websocket.send(JSON.stringify(msg) + "\n");
+            msg.command = ['L', '0000000100001010010001100000000'];
+            websocket.send(JSON.stringify(msg) + "\n");
+        }
+
+        function writeToScreen(message)
+        {
+            let pre = document.createElement("p");
+            pre.style.wordWrap = "break-word";
+            pre.innerHTML = message;
+            output.appendChild(pre);
+        }
+
+        function getSpeed()
+        {
+            let radios = document.getElementsByName('speed');
+
+            for (let i = 0, length = radios.length; i < length; i++) {
+                if (radios[i].checked) {
+                    // do whatever you want with the checked radio
+                    return parseInt(radios[i].value);
+                }
+            }
+        }
+
+        window.addEventListener("load", init, false);
+
+    </script>
+
+    <style>
+        body {
+            background-color: #eeeeee;
+        }
+        .myPict {
+            line-height: 0em;
+            padding-bottom: 0em;
+        }
+        .myImg {
+            background-color: #0074d9;
+            border: 5px solid #111111;
+        }
+        .shyButton {
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+<h2 align="center">Otto remote control</h2>
+
+<div class="flex three">
+    <div id="spd" class="off-third">
+        <label>
+            <input type="radio" id="slow" name="speed" value="500">
+            <span class="checkable">Slow</span>
+        </label><br>
+        <input type="radio" id="normal" name="speed" value="1000" checked="checked">
+        <label for="normal" class="checkable">Normal</label><br>
+        <input type="radio" id="fast" name="speed" value="1500">
+        <label for="fast" class="checkable">Fast</label>
+    </div>
+</div>
+<div class="flex three">
+    <div id="control" class="off-sixth two-third off-third-500 third-500">
+        <div class="flex three">
+            <picture data-tooltip="Move Forward" class="off-third myPict tooltip-top">
+                <source srcset="./images/control/forward.png" media="(max-width: 1000px)">
+                <source srcset="./images/control/forward@2x.png" media="(max-width: 1500px)">
+                <source srcset="./images/control/forward@3x.png">
+                <img class="myImg" src="./images/control/forward@3x.png" alt="Forward" onclick="sendMove([FORWARD, getSpeed()])">
+            </picture>
+        </div>
+        <div class="flex three">
+            <picture data-tooltip="Turn Left" class="myPict tooltip-top" onclick="sendMove([LEFT_TURN, getSpeed()])">
+                <source srcset="./images/control/left.png" media="(max-width: 1000px)">
+                <source srcset="./images/control/left@2x.png" media="(max-width: 1500px)">
+                <source srcset="./images/control/left@3x.png">
+                <img class="myImg" src="./images/control/left@3x.png" alt="Left">
+            </picture>
+            <picture data-tooltip="Turn Right" class="off-third myPict tooltip-top" onclick="sendMove([RIGHT_TURN, getSpeed()])">
+                <source srcset="./images/control/right.png" media="(max-width: 1000px)">
+                <source srcset="./images/control/right@2x.png" media="(max-width: 1500px)">
+                <source srcset="./images/control/right@3x.png">
+                <img class="myImg" src="./images/control/right@3x.png" alt="Right">
+            </picture>
+        </div>
+        <div class="flex three">
+            <picture data-tooltip="Move Backward" class="off-third tooltip-top" onclick="sendMove([BACKWARD, getSpeed()])">
+                <source srcset="./images/control/backward.png" media="(max-width: 1000px)">
+                <source srcset="./images/control/backward@2x.png" media="(max-width: 1500px)">
+                <source srcset="./images/control/backward@3x.png">
+                <img class="myImg" src="./images/control/backward@3x.png" alt="Backward">
+            </picture>
+        </div>
+    </div>
+</div>
+
+<div class="flex twelve">
+    <div id="output" class="off-sixth four-fifth card center">output</div>
+</div>
+
+</body>
+</html>
