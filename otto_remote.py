@@ -225,14 +225,12 @@ class ottoRemote(otto9.Otto9):
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], "&&A%%\r")
         elif cmd['src'] == 'WS':
-            cmd['sock'].write("Otto Ack")
+            response = {
+                'type': 'ottoAck',
+                'command': cmd['command'][0]
+            }
 
-    def sendResp(self, cmd, result):
-        if cmd['src'] == 'RFCOMM':
-            if self.rfComm.connected()[cmd['ch']] != 0:
-                self.rfComm.write(cmd['ch'], '&&' + cmd['command'][0] + ' ' + result + '%%\r')
-        elif cmd['src'] == 'WS':
-            cmd['sock'].write("Otto response " + cmd['command'][0] + ' ' + result + '\n')
+            cmd['sock'].write(ujson.dumps(response) + '\n')
 
     def sendFinalAck(self, cmd):
         utime.sleep_ms(30)
@@ -240,7 +238,25 @@ class ottoRemote(otto9.Otto9):
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], "&&F%%\r")
         elif cmd['src'] == 'WS':
-            cmd['sock'].write("Otto FinalAck")
+            response = {
+                'type': 'ottoFinalAck',
+                'command': cmd['command'][0]
+            }
+
+            cmd['sock'].write(ujson.dumps(response) + '\n')
+
+    def sendResp(self, cmd, result):
+        if cmd['src'] == 'RFCOMM':
+            if self.rfComm.connected()[cmd['ch']] != 0:
+                self.rfComm.write(cmd['ch'], '&&' + cmd['command'][0] + ' ' + result + '%%\r')
+        elif cmd['src'] == 'WS':
+            response = {
+                'type': 'ottoResponse',
+                'command': cmd['command'][0],
+                'result': result
+            }
+
+            cmd['sock'].write(ujson.dumps(response) + '\n')
 
     def rfRemoteCommand(self, ev):
         cmd = {

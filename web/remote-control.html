@@ -20,6 +20,8 @@
         let speed = 1000;
         let size  = 15;
 
+        let batteryTimer;
+
         function init()
         {
             output = document.getElementById("output");
@@ -37,19 +39,48 @@
 
         function onOpen(evt)
         {
+            document.getElementById("connStat").classList.remove('tryConnDot');
+            document.getElementById("connStat").classList.remove('disConnDot');
+            document.getElementById("connStat").classList.add('connDot');
             writeToScreen("CONNECTED");
             sendMove([HOME]);
+            // call for battery info
+            getBatteryInfo();
+            // setup to call batteryInfo every 30 seconds
+            batteryTimer = setInterval(getBatteryInfo, 30000);
         }
 
         function onClose(evt)
         {
+            document.getElementById("connStat").classList.remove('connDot');
+            document.getElementById("connStat").classList.remove('tryConnDot');
+            document.getElementById("connStat").classList.add('disConnDot');
+            clearInterval(batteryTimer);
             writeToScreen("DISCONNECTED");
         }
 
         function onMessage(evt)
         {
-            writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
-        }
+            // look to see if this is info we want
+            let response = JSON.parse(evt.data);
+
+            if (response.type === "ottoResponse")
+            {
+                // there are a few, for now battery is all I want
+
+                if (response.command === "B")
+                {
+                    // update the battery
+                    updateBatteryDisplay(response.result);
+                }
+            }
+            else if (response.type === "ottoAck") {
+                writeToScreen('<span style="color: blue;">ACK: ' + response.command + '</span>');
+            }
+            else if (response.type === "ottoFinalAck") {
+                writeToScreen('<span style="color: green;">FINAL_ACK: ' + response.command + '</span>');
+            }
+       }
 
         function onError(evt)
         {
@@ -76,6 +107,18 @@
                 // if this wasn't a home move, then send home as well
                 sendMove([HOME]);
             }
+        }
+
+        function getBatteryInfo()
+        {
+            // create the command to get the battery info from Otto
+            let msg = {
+                type: "ottoCommand",
+                command: ["B"]
+            }
+
+            writeToScreen("SENT: " + JSON.stringify(msg));
+            websocket.send(JSON.stringify(msg) + "\n");
         }
 
         function doSend(message)
@@ -111,6 +154,28 @@
             }
         }
 
+        function updateBatteryDisplay(level) {
+            var batteryLevel = document.getElementById("battery-level");
+            if (level < 2)
+                batteryLevel.style.width = 2 + '%';
+            else
+                batteryLevel.style.width = level + '%';
+            batteryLevel.innerText = level + '%';
+            if (level > 50) {
+                batteryLevel.classList.add('high');
+                batteryLevel.classList.remove('medium');
+                batteryLevel.classList.remove('low');
+            } else if (level >= 25 ) {
+                batteryLevel.classList.add('medium');
+                batteryLevel.classList.remove('high');
+                batteryLevel.classList.remove('low');
+            } else {
+                batteryLevel.classList.add('low');
+                batteryLevel.classList.remove('high');
+                batteryLevel.classList.remove('medium');
+            }
+        }
+
         window.addEventListener("load", init, false);
 
     </script>
@@ -127,14 +192,75 @@
             background-color: #0074d9;
             border: 5px solid #111111;
         }
-        .shyButton {
-            font-size: 1em;
+        .battery:after {
+            background-color: #fff;
+            border: 2px solid #000;
+            content: "";
+            display: block;
+            height: 16px;
+            position: absolute;
+            right: -6px;
+            top: 4px;
+            width: 6px;
+        }
+        .battery {
+            background-color: #fff;
+            border: 2px solid #000;
+            height: 32px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            width: 100px;
+        }
+        .battery .battery-level {
+            background-color: #666;
+            height: 100%;
+            text-align: center;
+        }
+        .battery .battery-level.high {
+            background-color: #66CD00;
+        }
+        .battery .battery-level.medium {
+            background-color: #FCD116;
+        }
+        .battery .battery-level.low {
+            background-color: #FF3333;
+        }
+        .disConnDot {
+            height: 25px;
+            width: 25px;
+            background-color: #ff4136;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .connDot {
+            height: 25px;
+            width: 25px;
+            background-color: #2ecc40;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .tryConnDot {
+            height: 25px;
+            width: 25px;
+            background-color: #ff851b;
+            border-radius: 50%;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
 <h2 align="center">Otto remote control</h2>
-
+<div class="flex three">
+    <div align="center">
+        Conn <span id="connStat" class="tryConnDot"></span>
+    </div>
+    <div class="off-third">
+        <div class="battery" id="battery">
+            <div id="battery-level" class="battery-level">??</div>
+        </div>
+    </div>
+</div>
 <div class="flex three">
     <div id="spd" class="off-third">
         <label>
