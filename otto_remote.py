@@ -150,13 +150,13 @@ class ottoRemote(otto9.Otto9):
                 self.sendFinalAck(cmd)
         elif command[0] == 'B':
             # 'B' is for request battery
-            print("Otto request battery")
+            self.cmdPrint("Otto request battery")
             batteryLevel = super().getBatteryLevel()
 
             self.sendResp(cmd, str(batteryLevel))
         elif command[0] == 'D':
             # 'D' is for request distance
-            print("Otto request distance")
+            self.cmdPrint("Otto request distance")
             distance = super().getDistance()
 
             self.sendResp(cmd, str(distance))
