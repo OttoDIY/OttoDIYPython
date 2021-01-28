@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Moves</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./lib/picnic/picnic.min.css">
+    <script type="text/javascript">
+
+        const HOME = 0;
+        const FORWARD = 1;
+        const BACKWARD = 2;
+        const LEFT_TURN = 3;
+        const RIGHT_TURN = 4;
+        const UPDOWN = 5;
+        const MOONWALK_RIGHT = 6;
+        const MOONWALK_LEFT = 7;
+        const SWING = 8;
+        const CRUSAITO_RIGHT = 9;
+        const CRUSAITO_LEFT = 10;
+        const JUMP = 11;
+        const FLAP_FRONT = 12;
+        const FLAP_BACK = 13;
+        const TIPTOESWING = 14;
+        const BEND_RIGHT = 15;
+        const BEND_LEFT = 16;
+        const SHAKELEG_RIGHT = 17;
+        const SHAKELEG_LEFT = 18;
+        const JITTER = 19;
+        const ASCENDINGTURN = 20;
+        const HAND_WAVE_LEFT = 21;
+        const HAND_WAVE_RIGHT = 22;
+        const HANDS_UP = 23;
+
+        function sendMove(move) {
+            parent.sendMove(move);
+        }
+    </script>
+    <style>
+        body {
+            background-color: #eeeeee;
+        }
+        .myPict {
+            line-height: 0em;
+            padding-bottom: 0em;
+            text-align: center;
+        }
+        @media screen and (max-width: 1000px){
+            .myImg {
+                width: 55px;
+                height: 55px;
+            }
+        }
+        @media screen and (min-width: 1000px){
+            .myImg {
+                width: 110px;
+                height: 110px;
+            }
+        }
+        @media screen and (min-width: 1500px){
+            .myImg {
+                width: 165px;
+                height: 165px;
+            }
+        }
+        .myImg {
+            line-height: 0em;
+            padding-bottom: 0em;
+            text-align: center;
+            background-color: #0074d9;
+            border: 5px solid #111111;
+        }
+        .thinBorder {
+            border: 2px solid #2ecc40;
+        }
+        .clearButton {
+            background-color: inherit;
+        }
+    </style>
+</head>
+<body>
+<div id="Moves" class="flex one three-500 tabContent">
+    <div class="off-sixth-500 two-third-500">
+        <div class="flex five">
+            <div data-tooltip="Hand Wave Right" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Hand/handright@2x.png" alt="Hand Wave Right" onclick="sendMove([HAND_WAVE_RIGHT])">
+            </div>
+            <div data-tooltip="Hand Wave Left" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Hand/handleft@2x.png" alt="Hand Wave Left" onclick="sendMove([HAND_WAVE_LEFT])">
+            </div>
+            <div data-tooltip="Hands Up" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Hand/handsup@2x.png" alt="Hands Up" onclick="sendMove([HANDS_UP])">
+            </div>
+            <div data-tooltip="Swing" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Swing/swing@2x.png" alt="Swing" onclick="sendMove([SWING])">
+            </div>
+            <div data-tooltip="Up/Down" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Updown/updown@2x.png" alt="Up/Down" onclick="sendMove([UPDOWN])">
+            </div>
+        </div>
+        <div>
+            <p></p>
+        </div>
+        <div class="flex five">
+            <div data-tooltip="Flap Front" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Flap/flapfront@2x.png" alt="Flap Front" onclick="sendMove([FLAP_FRONT])">
+            </div>
+            <div data-tooltip="Moonwalk Left" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Moonwalk/moonwalkleft@2x.png" alt="Moonwalk Left" onclick="sendMove([MOONWALK_LEFT])">
+            </div>
+            <div data-tooltip="Bend Left" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Bend/bendleft@2x.png" alt="Bend Left" onclick="sendMove([BEND_LEFT])">
+            </div>
+            <div data-tooltip="Shake Left Leg" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Shake/shakeleft@2x.png" alt="Shake Left Leg" onclick="sendMove([SHAKELEG_LEFT])">
+            </div>
+            <div data-tooltip="Cross Left" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Cross/crossleft@2x.png" alt="Cross Left" onclick="sendMove([CRUSAITO_LEFT])">
+            </div>
+        </div>
+        <div>
+            <p></p>
+        </div>
+        <div class="flex five">
+            <div data-tooltip="Flap Back" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Flap/flapback@2x.png" alt="Flap Back" onclick="sendMove([FLAP_BACK])">
+            </div>
+            <div data-tooltip="Moonwalk Right" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Moonwalk/moonwalkright@2x.png" alt="Moonwalk Right" onclick="sendMove([MOONWALK_RIGHT])">
+            </div>
+            <div data-tooltip="Bend Right" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Bend/bendright@2x.png" alt="Bend Right" onclick="sendMove([BEND_RIGHT])">
+            </div>
+            <div data-tooltip="Shake Right Leg" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Shake/shakeright@2x.png" alt="Shake Right Leg" onclick="sendMove([SHAKELEG_RIGHT])">
+            </div>
+            <div data-tooltip="Cross Right" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Cross/crossright@2x.png" alt="Cross Right" onclick="sendMove([CRUSAITO_RIGHT])">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
