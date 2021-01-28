@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./lib/picnic/picnic.min.css">
     <script type="text/javascript">
 
+        // move constants
         const HOME = 0;
         const FORWARD = 1;
         const BACKWARD = 2;
@@ -109,6 +110,56 @@
             }
         }
 
+        function sendSong(song)
+        {
+            let cmd = ['K'];
+
+            for (let i = 0; i < song.length ; i++)
+                cmd.push(song[i].toString())
+
+            let msg = {
+                type: "ottoCommand",
+                command: cmd,
+            };
+
+            writeToScreen("SENT: " + JSON.stringify(msg));
+            websocket.send(JSON.stringify(msg) + "\n");
+        }
+
+        function sendGesture(gesture)
+        {
+            let cmd = ['H'];
+
+            for (let i = 0; i < gesture.length ; i++)
+                cmd.push(gesture[i].toString())
+
+            let msg = {
+                type: "ottoCommand",
+                command: cmd,
+            };
+
+            writeToScreen("SENT: " + JSON.stringify(msg));
+            websocket.send(JSON.stringify(msg) + "\n");
+        }
+
+        function sendMouth(mouth)
+        {
+            let cmd = ['L'];
+
+            let binStr = mouth[0].toString(2);
+            let len = binStr.length;
+            let pre = '0'.repeat(31-len);
+            cmd.push(pre + binStr);
+
+            let msg = {
+                type: "ottoCommand",
+                command: cmd,
+            };
+
+            writeToScreen("SENT: " + JSON.stringify(msg));
+            websocket.send(JSON.stringify(msg) + "\n");
+        }
+
         function getBatteryInfo()
         {
             // create the command to get the battery info from Otto
@@ -176,6 +227,21 @@
             }
         }
 
+        function showIFrame(evt, frameUrl) {
+            // Declare all variables
+            var i, tablinks;
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tabLink");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById("buttonIFrame").src = frameUrl;
+            evt.currentTarget.className += " active";
+        }
+
         window.addEventListener("load", init, false);
 
     </script>
@@ -187,10 +253,54 @@
         .myPict {
             line-height: 0em;
             padding-bottom: 0em;
+            text-align: center;
+        }
+        @media screen and (max-width: 1000px){
+            .myImg {
+                width: 55px;
+                height: 55px;
+            }
+            .buttonIFrame {
+                height: 205px;
+            }
+        }
+        @media screen and (min-width: 1000px){
+            .myImg {
+                width: 110px;
+                height: 110px;
+            }
+            .buttonIFrame {
+                height: 380px;
+            }
+        }
+        @media screen and (min-width: 1500px){
+            .myImg {
+                width: 165px;
+                height: 165px;
+            }
+            .buttonIFrame {
+                height: 550px;
+            }
         }
         .myImg {
+            line-height: 0em;
+            padding-bottom: 0em;
+            text-align: center;
             background-color: #0074d9;
             border: 5px solid #111111;
+        }
+        .buttonIFrame {
+            width: 100%;
+            border: 0;
+        }
+        .thinBorder {
+            border: 2px solid #2ecc40;
+        }
+        .clearButton {
+            background-color: inherit;
+        }
+        .tabContent {
+            display: none;
         }
         .battery:after {
             background-color: #fff;
@@ -276,34 +386,51 @@
 <div class="flex three">
     <div id="control" class="off-sixth two-third off-third-500 third-500">
         <div class="flex three">
-            <picture data-tooltip="Move Forward" class="off-third myPict tooltip-top">
-                <source srcset="./images/control/forward.png" media="(max-width: 1000px)">
-                <source srcset="./images/control/forward@2x.png" media="(max-width: 1500px)">
-                <source srcset="./images/control/forward@3x.png">
-                <img class="myImg" src="./images/control/forward@3x.png" alt="Forward" onclick="sendMove([FORWARD, getSpeed()])">
-            </picture>
+            <div data-tooltip="Move Forward" class="myPict off-third tooltip-top" onclick="sendMove([FORWARD, getSpeed()])">
+                <img class="myImg" src="images/Control/forward@2x.png" alt="Forward">
+            </div>
         </div>
         <div class="flex three">
-            <picture data-tooltip="Turn Left" class="myPict tooltip-top" onclick="sendMove([LEFT_TURN, getSpeed()])">
-                <source srcset="./images/control/left.png" media="(max-width: 1000px)">
-                <source srcset="./images/control/left@2x.png" media="(max-width: 1500px)">
-                <source srcset="./images/control/left@3x.png">
-                <img class="myImg" src="./images/control/left@3x.png" alt="Left">
-            </picture>
-            <picture data-tooltip="Turn Right" class="off-third myPict tooltip-top" onclick="sendMove([RIGHT_TURN, getSpeed()])">
-                <source srcset="./images/control/right.png" media="(max-width: 1000px)">
-                <source srcset="./images/control/right@2x.png" media="(max-width: 1500px)">
-                <source srcset="./images/control/right@3x.png">
-                <img class="myImg" src="./images/control/right@3x.png" alt="Right">
-            </picture>
+            <div data-tooltip="Turn Left" class="myPict tooltip-top" onclick="sendMove([LEFT_TURN, getSpeed()])">
+                <img class="myImg" src="images/Control/left@2x.png" alt="Left">
+            </div>
+            <div data-tooltip="Turn Right" class="off-third myPict tooltip-top" onclick="sendMove([RIGHT_TURN, getSpeed()])">
+                <img class="myImg" src="images/Control/right@2x.png" alt="Right">
+            </div>
         </div>
         <div class="flex three">
-            <picture data-tooltip="Move Backward" class="off-third tooltip-top" onclick="sendMove([BACKWARD, getSpeed()])">
-                <source srcset="./images/control/backward.png" media="(max-width: 1000px)">
-                <source srcset="./images/control/backward@2x.png" media="(max-width: 1500px)">
-                <source srcset="./images/control/backward@3x.png">
-                <img class="myImg" src="./images/control/backward@3x.png" alt="Backward">
-            </picture>
+            <div data-tooltip="Move Backward" class="off-third tooltip-top myPict" onclick="sendMove([BACKWARD, getSpeed()])">
+                <img class="myImg" src="images/Control/backward@2x.png" alt="Backward">
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="buttonIFrame" class="buttonIFrame" scrolling="no" src="moves.html" title="buttons"></iframe>
+
+<div class="flex six">
+    <div class="off-sixth two-third thinBorder">
+        <div class="flex four">
+            <button id="defaultTab" class="clearButton tabLink" onclick="showIFrame(event, 'moves.html')">
+                <div data-tooltip="Moves" >
+                    <img class="myImg" src="images/Buttons/Swing/swing@2x.png"/>
+                </div>
+            </button>
+            <button class="clearButton tabLink" onclick="showIFrame(event, 'songs.html')">
+                <div data-tooltip="Songs">
+                    <img class="myImg" src="images/Buttons/Humanoid/Beep/beep@2x.png"/>
+                </div>
+            </button>
+            <button class="clearButton tabLink" onclick="showIFrame(event, 'gestures.html')">
+                <div data-tooltip="Gestures">
+                    <img class="myImg" src="images/Buttons/Gestures/SuperHappy/superhappy@2x.png"/>
+                </div>
+            </button>
+            <button class="clearButton tabLink" onclick="showIFrame(event, 'mouths.html')">
+                <div data-tooltip="Mouths">
+                    <img class="myImg" src="images/Buttons/Humanoid/Mouth/SuperHappy/superhappy@2x.png"/>
+                </div>
+            </button>
         </div>
     </div>
 </div>
