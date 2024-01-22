@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Songs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./lib/picnic/picnic.min.css">
+    <script type="text/javascript">
+        // song constants
+
+        const DISCONNECTION = 2;
+        const SURPRISE = 3;
+        const OHOOH = 4;
+        const OHOOH2 = 5;
+        const CUDDLY = 6;
+        const SLEEPING = 7;
+        const HAPPY = 8;
+        const SUPERHAPPY = 9;
+        const HAPPYSHORT = 10;
+        const SAD = 11;
+        const CONFUSED = 12;
+        const FART1 = 13;
+        const FART2 = 14;
+        const FART3 = 15;
+        const MODE1 = 16;
+        const MODE2 = 17;
+        const MODE3 = 18;
+        const BUTTONPUSHED = 19
+
+        function sendSong(song) {
+            parent.sendSong(song);
+        }
+    </script>
+    <style>
+        body {
+            background-color: #eeeeee;
+        }
+        .myPict {
+            line-height: 0em;
+            padding-bottom: 0em;
+            text-align: center;
+        }
+        @media screen and (max-width: 1000px){
+            .myImg {
+                width: 55px;
+                height: 55px;
+            }
+        }
+        @media screen and (min-width: 1000px){
+            .myImg {
+                width: 110px;
+                height: 110px;
+            }
+        }
+        @media screen and (min-width: 1500px){
+            .myImg {
+                width: 165px;
+                height: 165px;
+            }
+        }
+        .myImg {
+            line-height: 0em;
+            padding-bottom: 0em;
+            text-align: center;
+            background-color: #0074d9;
+            border: 5px solid #111111;
+        }
+        .thinBorder {
+            border: 2px solid #2ecc40;
+        }
+        .clearButton {
+            background-color: inherit;
+        }
+    </style>
+</head>
+<body>
+<div id="Songs" class="flex one three-500 tabContent">
+    <div class="off-sixth-500 two-third-500">
+        <div class="flex five">
+            <div data-tooltip="Mode 1" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Mode/mode1@2x.png" alt="Mode 1" onclick="sendSong([MODE1])">
+            </div>
+            <div data-tooltip="Mode 2" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Mode/mode2@2x.png" alt="Mode 2" onclick="sendSong([MODE2])">
+            </div>
+            <div data-tooltip="Mode 3" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Mode/mode3@2x.png" alt="Mode 2" onclick="sendSong([MODE3])">
+            </div>
+            <div data-tooltip="OhOoh 2" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/OhOoh/OhOoh2@2x.png" alt="OhOoh2" onclick="sendSong([OHOOH2])">
+            </div>
+            <div data-tooltip="Button Pushed" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Button/buttonPushed@2x.png" alt="Button Pushed" onclick="sendSong([BUTTONPUSHED])">
+            </div>
+        </div>
+        <div>
+            <p></p>
+        </div>
+        <div class="flex five">
+            <div data-tooltip="Happy Short" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Happy_short/happy_short@2x.png" alt="Happy Short" onclick="sendSong([HAPPYSHORT])">
+            </div>
+            <div data-tooltip="Happy" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Happy/happy@2x.png" alt="Happy" onclick="sendSong([HAPPY])">
+            </div>
+            <div data-tooltip="Super Happy" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/SuperHappy/superHappy@2x.png" alt="Super Happy" onclick="sendSong([SUPERHAPPY])">
+            </div>
+            <div data-tooltip="Sad" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Sad/sad@2x.png" alt="Sad" onclick="sendSong([SAD])">
+            </div>
+            <div data-tooltip="Sleeping" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Sleeping/sleeping@2x.png" alt="Sleeping" onclick="sendSong([SLEEPING])">
+            </div>
+        </div>
+        <div>
+            <p></p>
+        </div>
+        <div class="flex five">
+            <div data-tooltip="Suprise" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Surprise/surprise@2x.png" alt="Surprise" onclick="sendSong([SURPRISE])">
+            </div>
+            <div data-tooltip="Disconnection" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Disconnection/disconnection@2x.png" alt="Disconnection" onclick="sendSong([DISCONNECTION])">
+            </div>
+            <div data-tooltip="Confused" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Confused/confused@2x.png" alt="Confused" onclick="sendSong([CONFUSED])">
+            </div>
+            <div data-tooltip="Fart 3" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Fart/fart3@2x.png" alt="Fart 3" onclick="sendSong([FART3])">
+            </div>
+            <div data-tooltip="Cuddly" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Sing/Cuddly/cuddly@2x.png" alt="Cuddly" onclick="sendSong([CUDDLY])">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

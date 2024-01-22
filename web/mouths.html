@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mouths</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./lib/picnic/picnic.min.css">
+    <script text="text/javascript">
+        function sendMouth(mouth) {
+            parent.sendMouth(mouth);
+        }
+    </script>
+    <style>
+        body {
+            background-color: #eeeeee;
+        }
+        .myPict {
+            line-height: 0em;
+            padding-bottom: 0em;
+            text-align: center;
+        }
+        @media screen and (max-width: 1000px){
+            .myImg {
+                width: 55px;
+                height: 55px;
+            }
+        }
+        @media screen and (min-width: 1000px){
+            .myImg {
+                width: 110px;
+                height: 110px;
+            }
+        }
+        @media screen and (min-width: 1500px){
+            .myImg {
+                width: 165px;
+                height: 165px;
+            }
+        }
+        .myImg {
+            line-height: 0em;
+            padding-bottom: 0em;
+            text-align: center;
+            background-color: #0074d9;
+            border: 5px solid #111111;
+        }
+        .thinBorder {
+            border: 2px solid #2ecc40;
+        }
+        .clearButton {
+            background-color: inherit;
+        }
+    </style>
+</head>
+<body>
+<div id="Mouths" class="flex one three-500 tabContent">
+    <div class="off-sixth-500 two-third-500">
+        <div class="flex five">
+            <div data-tooltip="Happy" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Happy/happy@2x.png" alt="Happy" onclick="sendMouth([0x852300])">
+            </div>
+            <div data-tooltip="Super Happy" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/SuperHappy/superhappy@2x.png" alt="Super Happy" onclick="sendMouth([0xfd2300])">
+            </div>
+            <div data-tooltip="Love" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Love/love@2x.png" alt="Love" onclick="sendMouth([0x12b6148c])">
+            </div>
+            <div data-tooltip="Sad" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Sad/sad@2x.png" alt="Sad" onclick="sendMouth([0x312840])">
+            </div>
+            <div data-tooltip="Fail" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Fail/fail@2x.png" alt="Fail" onclick="sendMouth([0x2148c4a1])">
+            </div>
+        </div>
+        <div>
+            <p></p>
+        </div>
+        <div class="flex five">
+            <div data-tooltip="Confused" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Confused/confused@2x.png" alt="Confused" onclick="sendMouth([0x215880])">
+            </div>
+            <div data-tooltip="Fart" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Fart/fart@2x.png" alt="Fart" onclick="sendMouth([0xfc9246])">
+            </div>
+            <div data-tooltip="Fretful" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Fretful/fretful@2x.png" alt="Fretful" onclick="sendMouth([0x3f000])">
+            </div>
+            <div data-tooltip="Angry" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Angry/angry@2x.png" alt="Angry" onclick="sendMouth([0x7a1840])">
+            </div>
+            <div data-tooltip="Sleeping" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Sleeping/sleeping@2x.png" alt="Sleeping" onclick="sendMouth([0x18600])">
+            </div>
+        </div>
+        <div>
+            <p></p>
+        </div>
+        <div class="flex five">
+            <div data-tooltip="Magic" class="myPict tooltip-top off-fifth">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Magic/magic@2x.png" alt="Magic" onclick="sendMouth([0x4a1480])">
+            </div>
+            <div data-tooltip="Victory" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Victory/victory@2x.png" alt="Victory" onclick="sendMouth([0xc4a148c])">
+            </div>
+            <div data-tooltip="Wave" class="myPict tooltip-top">
+                <img class="myImg" src="images/Buttons/Humanoid/Mouth/Wave/wave@2x.png" alt="Wave" onclick="sendMouth([0xc4230])">
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
