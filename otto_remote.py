@@ -294,7 +294,11 @@ class ottoRemote(otto9.Otto9):
 
     def wsRemoteCommand(self, clientSock):
         if clientSock == self.clientSock:
-            strg = self.webSock.readline()
+            try:
+                strg = self.webSock.readline()
+            except:
+                # close the socket
+                strg = ""
 
             if len(strg) == 0:
                 # the connection is gone
