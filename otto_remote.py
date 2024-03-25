@@ -1,21 +1,29 @@
 import otto9
 import mouths
 
+import binascii
+import hashlib
+from micropython import const
+
 import socket
+import sys
 import network
-import websocket_helper
-import uwebsocket
+#import websocket_helper
+import websocket
 import ujson
 
 try:
     from esp32 import RFCOMM
 except ImportError:
-    print("This version of micropython esp32 doesn't support RFCOMM")
-    raise ImportError
+    hasRfcomm = False
+#    print("This version of micropython esp32 doesn't support RFCOMM")
+#    raise ImportError
 
 from machine import Timer
 import utime
 
+# we may need this
+DEBUG = 0
 
 class ottoRemote(otto9.Otto9):
     def __init__(self, name="Otto", prgId="Otto_V9", webPort=8181):
@@ -25,8 +33,10 @@ class ottoRemote(otto9.Otto9):
         self.cmdList = []
         self.savedCmd = None
         self.name = name
-        self.rfComm = RFCOMM(device=self.name, server="ESP32")
-        self.rfComm.callback(RFCOMM.CBTYPE_PATTERN, self.rfRemoteCommand, pattern='\r')
+        self.rfComm = None
+        if hasRfcomm:
+            self.rfComm = RFCOMM(device=self.name, server="ESP32")
+            self.rfComm.callback(RFCOMM.CBTYPE_PATTERN, self.rfRemoteCommand, pattern='\r')
         self.cmdDebug = False
         self.printCmd = False
         self.moveDebug = False
@@ -67,8 +77,9 @@ class ottoRemote(otto9.Otto9):
         self.setupConn()
 
     def deinit(self):
-        # we need to deinit rfComm
-        self.rfComm.deinit()
+        if self.rfComm:
+            # we need to deinit rfComm
+            self.rfComm.deinit()
         super().deinit()
 
     def cmdProc(self, _):
@@ -221,7 +232,7 @@ class ottoRemote(otto9.Otto9):
 
     def sendAck(self, cmd):
         utime.sleep_ms(30)
-        if cmd['src'] == 'RFCOMM':
+        if cmd['src'] == 'RFCOMM' and self.rfComm:
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], "&&A%%\r")
         elif cmd['src'] == 'WS':
@@ -234,7 +245,7 @@ class ottoRemote(otto9.Otto9):
 
     def sendFinalAck(self, cmd):
         utime.sleep_ms(30)
-        if cmd['src'] == 'RFCOMM':
+        if cmd['src'] == 'RFCOMM' and self.rfComm:
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], "&&F%%\r")
         elif cmd['src'] == 'WS':
@@ -246,7 +257,7 @@ class ottoRemote(otto9.Otto9):
             cmd['sock'].write(ujson.dumps(response) + '\n')
 
     def sendResp(self, cmd, result):
-        if cmd['src'] == 'RFCOMM':
+        if cmd['src'] == 'RFCOMM' and self.rfComm:
             if self.rfComm.connected()[cmd['ch']] != 0:
                 self.rfComm.write(cmd['ch'], '&&' + cmd['command'][0] + ' ' + result + '%%\r')
         elif cmd['src'] == 'WS':
@@ -283,7 +294,11 @@ class ottoRemote(otto9.Otto9):
 
     def wsRemoteCommand(self, clientSock):
         if clientSock == self.clientSock:
-            strg = self.webSock.readline()
+            try:
+                strg = self.webSock.readline()
+            except:
+                # close the socket
+                strg = ""
 
             if len(strg) == 0:
                 # the connection is gone
@@ -304,13 +319,81 @@ class ottoRemote(otto9.Otto9):
             except:
                 pass
 
+    def server_handshake(self):
+        req = self.clientSock.makefile("rwb", 0)
+        # Skip HTTP GET line.
+        l = req.readline()
+        if DEBUG:
+            sys.stdout.write(repr(l))
+
+        webkey = None
+        upgrade = False
+        websocket = False
+
+        while True:
+            l = req.readline()
+            if not l:
+                # EOF in headers.
+                return False
+            if l == b"\r\n":
+                break
+            if DEBUG:
+                sys.stdout.write(l)
+            h, v = [x.strip() for x in l.split(b":", 1)]
+            if DEBUG:
+                print((h, v))
+            if h == b"Sec-WebSocket-Key":
+                webkey = v
+            elif h == b"Connection" and b"Upgrade" in v:
+                upgrade = True
+            elif h == b"Upgrade" and v == b"websocket":
+                websocket = True
+
+        if not (upgrade and websocket and webkey):
+            return False
+
+        if DEBUG:
+            print("Sec-WebSocket-Key:", webkey, len(webkey))
+
+        d = hashlib.sha1(webkey)
+        d.update(b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
+        respkey = d.digest()
+        respkey = binascii.b2a_base64(respkey)[:-1]
+        if DEBUG:
+            print("respkey:", respkey)
+
+        self.clientSock.send(
+            b"""\
+HTTP/1.1 101 Switching Protocols\r
+Upgrade: websocket\r
+Connection: Upgrade\r
+Sec-WebSocket-Accept: """
+        )
+        self.clientSock.send(respkey)
+        self.clientSock.send("\r\n\r\n")
+        return True
+
+    def send_html(self):
+        self.clientSock.send(
+            b"""\
+HTTP/1.0 400 Bad Request\r
+\r
+"""
+        )
+        self.clientSock.close()
+        self.clientSock = None
+
     def acceptConn(self, listenSock):
+        if self.listenSock != listenSock:
+            self.listenSock = listenSock
+
         cl, remote_addr = self.listenSock.accept()
         print("\nOtto WS connection from:", remote_addr)
 
         if self.clientSock is not None:
             try:
-                self.webSock.close()
+                if self.webSock is not None:
+                    self.webSock.close()
                 self.clientSock.close()
             except:
                 pass
@@ -318,8 +401,10 @@ class ottoRemote(otto9.Otto9):
             self.clientSock = None
 
         self.clientSock = cl
-        websocket_helper.server_handshake(self.clientSock)
-        self.webSock = uwebsocket.websocket(self.clientSock, True)
+        if not self.server_handshake():
+            self.send_html()
+            return False
+        self.webSock = websocket.websocket(self.clientSock, True)
         self.clientSock.setblocking(False)
         self.clientSock.setsockopt(socket.SOL_SOCKET, 20, self.wsRemoteCommand)
 
