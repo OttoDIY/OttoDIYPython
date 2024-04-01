@@ -1,9 +1,9 @@
-# OttoDIYPython
+# OttoDIYPython - 'devel' Branch
 
-## This is a port of the OttoDIY Robot Arduino API Otto.h to a [micropython based esp platform](https://docs.micropython.org/en/latest/)
+## This is a port of the OttoDIY Robot Arduino API Otto.h to the [micropython platform](https://docs.micropython.org/en/latest/)
 
 ### This project is begining a new life. 3/31/2024
-so this branch 'devel' is currently broken ... do not use
+#### so this branch 'devel' is currently broken ... do not use it!
 
 1) Install Micropython onto your microcontroller (I used a esp8266 nodemcu board)
 2) Upload these files on to the board ... Use uPyCraft or ampy
