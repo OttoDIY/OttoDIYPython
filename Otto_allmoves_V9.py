@@ -1,10 +1,10 @@
 #-- Otto All moves python test 
-#-- OttDIY Python Project, 2020
+#-- OttDIY Python Project, 2024
 
-import otto9, time
+import otto, time
 
-Otto = otto9.Otto9()
-Otto.init(5, 12, 13, 14, True, 0, 1, 2, 3)
+Otto = otto.Otto()
+Otto.init(D3, D4, D7, D8, True, D5)
 Otto.home()
 
 Otto.walk(2, 1000, FORWARD)         #-- 2 steps, "TIME". IF HIGHER THE VALUE THEN SLOWER (from 600 to 1400), 1 FORWARD
