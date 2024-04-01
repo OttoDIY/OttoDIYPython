@@ -1,6 +1,5 @@
-
 #-- gestures supported by Otto
-#-- OttDIY Python Project, 2020
+#-- OttDIY Python Project, 2024
 
 OTTOHAPPY      = const(0)
 OTTOSUPERHAPPY = const(1)

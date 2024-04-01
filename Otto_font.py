@@ -1,4 +1,4 @@
-#-- OttDIY Python Project, 2020
+#-- OttDIY Python Project, 2024
 
 font_6x8 = {
     '0': b'\x00\x7C\x82\x82\x7C\x00',
