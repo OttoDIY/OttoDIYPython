@@ -1,13 +1,9 @@
 # OttoDIYPython
 
-This is a port of the OttoDIY Robot API ([Otto9.h](https://github.com/OttoDIY/OttoDIYLib/blob/master/Otto9.h) & Otto9Humanoid.h) to a [micropython based esp platform](https://docs.micropython.org/en/latest/esp8266/tutorial/intro.html)
+## This is a port of the OttoDIY Robot Arduino API Otto.h to a [micropython based esp platform](https://docs.micropython.org/en/latest/)
 
-This project has just begun ... it's not ready for use yet ... [please look at 
-the issues](https://github.com/OttoDIY/OttoDIYPython/issues) to see if you can help make this a reality ...
-
-we now have added the humanoid support 😄 ... [Read this issue post](https://github.com/OttoDIY/OttoDIYPython/issues/17) to see how it's used ...
-
-The Motion Code has been ported ... and a test file has been created ... to test this out
+### This project is begining a new life. 3/31/2024
+so this branch 'devel' is currently broken ... do not use
 
 1) Install Micropython onto your microcontroller (I used a esp8266 nodemcu board)
 2) Upload these files on to the board ... Use uPyCraft or ampy
