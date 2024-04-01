@@ -1,7 +1,7 @@
-#-- OttDIY Python Project, 2020
+#-- OttDIY Python Project, 2024
 
 from machine import Pin, SPI
-import otto_font, time
+import Otto_font, time
 
 DECODEMODE  = const(0x09)
 INTENSITY   = const(0x0a)
@@ -9,6 +9,7 @@ SCANLIMIT   = const(0x0b)
 SHUTDOWN    = const(0x0c)
 DISPLAYTEST = const(0x0f)
 
+#FIXME: init is nolonger automatic & assigning pins are done in OttoMatrix.init()
 class OttoMatrix:
     #-- initialize an LED matrix with all the pins
     #-- Parameters:

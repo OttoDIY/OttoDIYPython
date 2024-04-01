@@ -1,10 +1,9 @@
 # -- OttoDIY Python Project, 2024
 
 from micropython import const
-import oscillator, utime, math, store
 from machine import Pin, PWM, ADC
-import songs, notes, mouths, gestures
-import otto_matrix
+import oscillator, utime, math
+import Otto_store, Otto_songs, Otto_notes, Otto_mouths, Otto_gestures, Otto_matrix
 
 # -- Constants
 FORWARD  = const(1)

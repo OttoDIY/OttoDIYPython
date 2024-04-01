@@ -1,5 +1,5 @@
-#-- Note constants for otto9
-#-- OttDIY Python Project, 2020
+#-- Note constants for Otto
+#-- OttDIY Python Project, 2024
 
 C0  = const(16)   #-- 16.35
 Db0 = const(17)   #-- 17.32

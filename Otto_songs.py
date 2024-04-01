@@ -1,5 +1,5 @@
-#-- Song CONSTANTS for otto9
-#-- OttDIY Python Project, 2020
+#-- Song CONSTANTS for Otto
+#-- OttDIY Python Project, 2024
 
 CONNECTION    = const(0)
 DISCONNECTION = const(1)
