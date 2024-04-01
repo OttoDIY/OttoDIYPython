@@ -2,7 +2,7 @@
 
 from micropython import const
 from machine import Pin, PWM, ADC
-import oscillator, utime, math
+import Oscillator, utime, math
 import Otto_store, Otto_songs, Otto_notes, Otto_mouths, Otto_gestures, Otto_matrix
 
 # -- Constants
