@@ -1,12 +1,18 @@
-# OttoDIYPython - 'devel' Branch
+# OttoDIY Robot micropython Libraries - Development Branch
 
-## This is a port of the OttoDIY Robot Arduino API Otto.h to the [micropython platform](https://docs.micropython.org/en/latest/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![version](https://img.shields.io/badge/version-0.1.0-blue)
 
-### This project is begining a new life. 3/31/2024
-#### so this branch 'devel' is currently broken ... do not use it!
+This branch of the repository has the development [OttoDIY robot](https://www.ottodiy.com/) micropython libraries for [all Arduinos and compatible boards](#compatible-hardwareboards) .
+
+This project is begining a new life as of 3/31/2024 - this branch 'devel' could be currently broken ... do not use it!
+
+:star: Star us on GitHub, it helps!
+
+## Installation - Development Branch:
 
 1) Install Micropython onto your microcontroller
-2) Upload these files on to the board ... Use uPyCraft or ampy
+2) Upload these files on to the board ... Use uPyCraft, ampy, etc.
 3) run the Otto_allmoves.py file from the REPL with the following command
 
 `>>> exec(open('./examples/Otto_allmoves.py').read(),globals())`
